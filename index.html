@@ -1,0 +1,2367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <title>AMS Driver App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',
+                            surface: '#1e293b',
+                            border: '#334155'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Premium Light Theme */
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --surface-gradient: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+
+            /* Status Colors */
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+
+            /* Layout */
+            --header-height: 70px;
+            --nav-height: 80px;
+            --border-radius: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f1f5f9;
+            /* Slate-100 */
+            /* Light Premium Background */
+            background-image:
+                radial-gradient(circle at 0% 0%, #e0e7ff 0%, transparent 40%),
+                radial-gradient(circle at 100% 0%, #fae8ff 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, #eff6ff 0%, transparent 40%),
+                radial-gradient(circle at 0% 100%, #f3e8ff 0%, transparent 40%);
+            background-attachment: fixed;
+            color: #1e293b;
+            /* Slate-800 */
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Enforce Light Mode Text */
+        @media (prefers-color-scheme: dark) {
+            body {
+                color: #1e293b;
+                background: #f1f5f9;
+            }
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -0.02em;
+            color: #0f172a;
+            /* Slate-900 */
+        }
+
+        /* --- GLASSMORPHISM SYSTEM (Light Mode Optimized & Glossy) --- */
+        .glass {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05), inset 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.6));
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08), inset 0 2px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+        }
+
+        .glass-input:focus {
+            background: #ffffff;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.05);
+            outline: none;
+        }
+
+        .glass-strong {
+            background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 0 30px rgba(255, 255, 255, 0.7);
+        }
+
+        /* --- UTILITIES --- */
+        .text-gradient {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        /* --- MOBILE OPTIMIZATIONS --- */
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        /* Floating Nav Island */
+        .nav-island {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 12px 24px;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dark .nav-island {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Invert for contrast or keep dark? Let's keep dark nav generally looks better */
+
+        .nav-item {
+            color: #64748b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active {
+            color: #a855f7;
+            transform: translateY(-4px);
+        }
+
+        .nav-item i {
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800">
+
+    <div id="app" class="min-h-screen flex flex-col relative pb-20" style="position: relative; z-index: 1;">
+        <div id="loading-screen"
+            class="fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-500"
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="flex flex-col items-center gap-6 scale-in">
+                <div class="relative">
+                    <div class="absolute inset-0 animate-ping rounded-full bg-white opacity-20"></div>
+                    <div class="relative w-20 h-20 rounded-full glass-dark flex items-center justify-center">
+                        <i class="ph-fill ph-truck text-4xl text-white"></i>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay: 0s;"></div>
+                        <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+                        <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay: 0.4s;"></div>
+                    </div>
+                    <p class="text-white text-base font-semibold">Connecting Driver App...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modals"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, updateDoc, setDoc, doc, onSnapshot, query, where, orderBy, serverTimestamp, Timestamp, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1YRKvTHkK0QNMEdxfWbNCrKSWRzVOxdg",
+            authDomain: "ams-service-f923f.firebaseapp.com",
+            projectId: "ams-service-f923f",
+            storageBucket: "ams-service-f923f.firebasestorage.app",
+            messagingSenderId: "31368661696",
+            appId: "1:31368661696:web:61b78217d78ed9cec8fb25",
+            measurementId: "G-C0JVW9GMZJ"
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'ams-towing-v1';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // DOM Elements
+        const appDiv = document.getElementById('app');
+        const modalDiv = document.getElementById('modals');
+        const loadingScreen = document.getElementById('loading-screen');
+
+        // Mocks removed - fetching dynamically
+        const TOYOTA_MODELS = []; // Deprecated, using state.models
+        const CATEGORIES = { NEW: ['TVS', 'INT', 'FREE'], BREAKDOWN: ['TVS', 'Service', 'Direct'], EMPTY: [] };
+
+        window.state = {
+            user: null,
+            view: 'login',
+            driverTab: 'home',
+            activeTrip: null,
+            locations: [],
+            models: [],
+            shiftStatus: 'offline',
+            trips: [],
+            monthlyAttendance: [],
+            leaveRequests: [],
+            shiftRequests: [], // New state for shift requests
+            isContinuedSession: false,
+            lastTripData: null,
+            form: { truck: '', date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0], cat: '', type: '', pickup: '', drop: '', pickupOther: '', dropOther: '', model: '', modelOther: '', vehicleNo: '', customer: '' },
+            policeFines: [],
+            tollLogs: [],
+            expensesMode: null,
+            modal: null,
+            darkMode: false
+        };
+
+        // Initialize Theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+            window.state.darkMode = true;
+        }
+
+        window.toggleTheme = () => {
+            state.darkMode = !state.darkMode;
+            if (state.darkMode) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+            render();
+        };
+
+        const state = window.state;
+        // Elements defined at top of script
+
+        const formatTime = (ts) => { if (!ts) return '--:--'; const date = ts.toDate ? ts.toDate() : new Date(ts); return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); };
+        const formatDate = (ts) => { if (!ts) return '--/--'; const date = ts.toDate ? ts.toDate() : new Date(ts); return date.toLocaleDateString(); };
+
+        const initAuth = async () => {
+            try {
+                let signedIn = false;
+                // 1. Try Custom Token if available
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                        signedIn = true;
+                    } catch (e) {
+                        console.warn("Custom token mismatch, falling back to anonymous auth");
+                    }
+                }
+
+                // 2. Fallback to Anonymous
+                if (!signedIn) {
+                    await signInAnonymously(auth);
+                }
+
+            } catch (error) {
+                console.error("Auth Failed", error);
+                loadingScreen.innerHTML = `<div class="text-white text-center p-4"><p class="font-bold mb-2">Connection Error</p><p class="text-xs text-slate-300">${error.code || error.message}</p></div>`;
+            }
+        };
+
+        onAuthStateChanged(auth, (u) => {
+            if (u) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => { loadingScreen.style.display = 'none'; }, 500);
+                if (!state.user) render();
+            }
+        });
+
+        let unsubscribers = [];
+
+        const setupListeners = () => {
+            if (!state.user) return;
+
+            // Listen for latest status
+            const statusQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_attendance'), where('driverName', '==', state.user.name));
+            unsubscribers.push(onSnapshot(statusQ, (s) => {
+                const docs = s.docs.map(d => d.data());
+                docs.sort((a, b) => (b.lastUpdated?.seconds || 0) - (a.lastUpdated?.seconds || 0));
+                if (docs.length > 0) {
+                    // Check if the latest one is Online
+                    // If online, use that status.
+                    // If offline, user might have multiple records for today (e.g. S&A), but status is 'offline'
+                    state.shiftStatus = docs[0].status;
+                } else {
+                    state.shiftStatus = 'offline';
+                }
+                render();
+            }));
+
+            // Listen for Shift Requests
+            const reqQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_shift_requests'), where('driverName', '==', state.user.name));
+            unsubscribers.push(onSnapshot(reqQ, (s) => {
+                state.shiftRequests = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                render();
+            }));
+
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_trips'), where('driverName', '==', state.user.name));
+            unsubscribers.push(onSnapshot(q, (s) => {
+                const allTrips = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                allTrips.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                state.trips = allTrips;
+                state.activeTrip = allTrips.find(t => t.status === 'active') || null;
+
+                // Auto-correct: If active trip found but user is offline, switch to online automatically
+                if (state.activeTrip && state.shiftStatus === 'offline') {
+                    console.log("Auto-correcting status to ONLINE due to active trip");
+                    window.toggleShift();
+                }
+
+                if (state.activeTrip && (state.modal === 'startTrip' || state.modal === 'postTrip')) state.modal = null;
+                render();
+            }));
+
+            // Global listener for ALL active trips (for vehicle locking across all drivers)
+            const activeTripsQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_trips'), where('status', '==', 'active'));
+            unsubscribers.push(onSnapshot(activeTripsQ, (s) => {
+                state.allActiveTrips = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                render();
+            }));
+
+
+            const attQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_attendance'), where('driverName', '==', state.user.name));
+            unsubscribers.push(onSnapshot(attQ, (s) => { state.monthlyAttendance = s.docs.map(d => d.data()); render(); }));
+
+            const leaveQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_leave_requests'), where('driverName', '==', state.user.name));
+            unsubscribers.push(onSnapshot(leaveQ, (s) => { state.leaveRequests = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)); render(); }));
+
+            // Load all active vehicles for dropdown
+            const vQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_vehicles'), where('status', 'in', ['Active', 'active']));
+            unsubscribers.push(onSnapshot(vQ, (s) => {
+                state.vehicles = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                render();
+            }));
+
+            // Load active locations
+            const lQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_locations'), where('status', 'in', ['Active', 'active']));
+            unsubscribers.push(onSnapshot(lQ, (s) => {
+                state.locations = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                render();
+            }));
+
+            // Load active models
+            const mQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_vehicle_models'), where('status', 'in', ['Active', 'active']));
+            unsubscribers.push(onSnapshot(mQ, (s) => {
+                state.models = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                render();
+            }));
+            // Fetch Expenses for History
+            const pfQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_police_fines'), where('driverName', '==', state.user.name));
+            unsubscribers.push(onSnapshot(pfQ, (s) => { state.policeFines = s.docs.map(d => ({ id: d.id, ...d.data(), dataType: 'fine' })); render(); }));
+
+            const tlQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_toll_logs'), where('driverName', '==', state.user.name));
+            unsubscribers.push(onSnapshot(tlQ, (s) => { state.tollLogs = s.docs.map(d => ({ id: d.id, ...d.data(), dataType: 'toll' })); render(); }));
+        };
+
+        window.handleLogin = async (e) => {
+            e.preventDefault();
+            if (!auth.currentUser) await initAuth();
+            const phone = document.getElementById('login-phone').value.trim();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Verifying...';
+            btn.disabled = true;
+
+            try {
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_drivers'), where('phone', '==', phone), where('status', '==', 'Active'));
+                const snapshot = await getDocs(q);
+
+                if (!snapshot.empty) {
+                    const docData = snapshot.docs[0].data();
+                    state.user = { name: docData.name, role: 'driver', phone: docData.phone, id: snapshot.docs[0].id, branch: docData.branch || 'Coimbatore' };
+                    state.view = 'driver';
+                    setupListeners();
+                } else {
+                    alert('Phone number not found or inactive. Please contact Admin.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Login failed: ' + err.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                render();
+            }
+            return false;
+        };
+
+        window.handleLogout = () => {
+            state.user = null; state.view = 'login'; state.activeTrip = null; state.trips = [];
+            unsubscribers.forEach(u => u()); unsubscribers = [];
+            render();
+        };
+
+        window.submitShiftRequest = async () => {
+            const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'ams_shift_requests'), {
+                    driverName: state.user.name,
+                    driverPhone: state.user.phone,
+                    date: today,
+                    status: 'pending',
+                    createdAt: serverTimestamp()
+                });
+                state.modal = 'shiftRequestPending';
+                render();
+            } catch (e) {
+                console.error("Error requesting shift:", e);
+                alert("Failed to send request. Please try again.");
+            }
+        };
+
+        window.toggleShift = async () => {
+            if (state.shiftStatus === 'online' && state.activeTrip) {
+                return alert("⚠️ You cannot go Off Duty while a trip is active. Please end your trip first.");
+            }
+
+            const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_attendance'), where('driverName', '==', state.user.name));
+            const snapshot = await getDocs(q);
+            const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            docs.sort((a, b) => (b.lastUpdated?.seconds || 0) - (a.lastUpdated?.seconds || 0));
+            const latestDoc = docs.length > 0 ? docs[0] : null;
+
+            let newStatus;
+            let isExtraShift = false;
+
+            if (state.activeTrip) {
+                newStatus = 'online';
+            } else {
+                newStatus = state.shiftStatus === 'online' ? 'offline' : 'online';
+            }
+
+            // --- ONE SHIFT PER DAY CHECK (WITH MULTI-SHIFT SUPPORT) ---
+            if (newStatus === 'online') {
+                const todayRecords = docs.filter(d => d.date === today);
+                // Count strictly completed shifts (offline status)
+                const completedShiftsCount = todayRecords.filter(d => d.status === 'offline' && d.checkOutTime).length;
+                const isCurrentlyOnline = todayRecords.some(d => d.status === 'online');
+
+                // If not currently online and we have completed at least one shift today
+                if (!isCurrentlyOnline && completedShiftsCount > 0) {
+                    const requests = state.shiftRequests || [];
+                    const todayRequests = requests.filter(r => r.date === today);
+                    const approvedCount = todayRequests.filter(r => r.status === 'approved').length;
+                    const pendingCount = todayRequests.filter(r => r.status === 'pending').length;
+
+                    // Rule: accepted approvals must be >= completed shifts to start the NEXT one
+                    // e.g. 1 completed shift -> Need 1 approval to start 2nd.
+                    // e.g. 2 completed shifts -> Need 2 approvals to start 3rd.
+                    if (approvedCount < completedShiftsCount) {
+                        if (pendingCount > 0) {
+                            state.modal = 'shiftRequestPending';
+                            render();
+                            return;
+                        } else {
+                            // If rejected, maybe we should show rejected or just let them request again?
+                            // For now, if no pending but not enough approved, allow request.
+                            const rejectedCount = todayRequests.filter(r => r.status === 'rejected').length;
+                            if (rejectedCount > pendingCount) { // Basic check if last was rejected
+                                // Optional: Alert user, but allow new request
+                            }
+                            state.modal = 'requestSecondShift';
+                            render();
+                            return;
+                        }
+                    }
+                    // If we passed the check, it's an extra shift
+                    isExtraShift = true;
+                }
+            }
+
+            try {
+                if (newStatus === 'offline' && latestDoc && latestDoc.status === 'online') {
+                    // Update the record that is currently online
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ams_attendance', latestDoc.id), {
+                        status: 'offline',
+                        checkOutTime: serverTimestamp(),
+                        lastUpdated: serverTimestamp()
+                    });
+                } else if (newStatus === 'online') {
+                    // Start new online session
+                    let docId = `${today}_${state.user.name}`;
+                    if (isExtraShift) {
+                        // Use timestamp to ensure unique ID for 2nd, 3rd, 4th shifts
+                        docId = `${today}_${state.user.name}_extra_${Date.now()}`;
+                    }
+
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ams_attendance', docId), {
+                        driverId: state.user.phone, driverName: state.user.name, driverPhone: state.user.phone,
+                        date: today, status: 'online', checkInTime: serverTimestamp(), lastUpdated: serverTimestamp(),
+                        type: isExtraShift ? 'S&A' : 'Regular'
+                    }, { merge: true });
+                }
+                state.shiftStatus = newStatus;
+                render();
+            } catch (e) {
+                console.error("Error toggling shift:", e);
+                alert("Connection error. Please try again.");
+            }
+        };
+
+        const getVehicleOdo = (truckNo) => {
+            const v = state.vehicles.find(v => (v.vehicleNumber || v.number) === truckNo);
+            return v ? (v.odometer || '') : '';
+        };
+
+        window.openStartTripModal = (e) => {
+            e.preventDefault();
+            const f = state.form;
+            if (!f.truck || !f.date || (!f.pickup && !f.pickupOther) || (!f.drop && !f.dropOther)) {
+                state.alertMessage = "Please fill Truck, Date, Pickup and Drop.";
+                state.modal = 'customAlert';
+                render();
+                return false;
+            }
+            if (!f.cat) {
+                state.alertMessage = "Please select a Category (New, Break, or Empty).";
+                state.modal = 'customAlert';
+                render();
+                return false;
+            }
+            if ((f.cat === 'New' || f.cat === 'Break Down') && !f.type) {
+                state.alertMessage = "Please select a specific Type (e.g. TVS, INT, FREE).";
+                state.modal = 'customAlert';
+                render();
+                return false;
+            }
+
+            // Skip Terms & Conditions for Empty trips
+            if (f.cat === 'Empty') {
+                state.termsData = {
+                    beltCondition: true, // Assume checked/NA
+                    deliveryChallan: 'NA',
+                    invoiceCopy: 'NA',
+                    eWayBill: 'NA',
+                    lorryReceipt: 'NA'
+                };
+                state.modal = 'startTrip';
+                render();
+                return false;
+            }
+
+            // Initialize terms data
+            state.termsData = {
+                beltCondition: false,
+                deliveryChallan: '',
+                invoiceCopy: '',
+                eWayBill: '',
+                lorryReceipt: ''
+            };
+            state.modal = 'termsConditions';
+            render();
+            return false;
+        };
+
+        window.acceptTerms = () => {
+            const td = state.termsData;
+            // Validate all fields are filled
+            if (!td.beltCondition) return alert("Please confirm Belt Condition");
+            if (!td.deliveryChallan || !td.invoiceCopy || !td.eWayBill || !td.lorryReceipt) {
+                return alert("Please fill all document fields (Yes/No/NA)");
+            }
+            state.modal = 'startTrip';
+            render();
+        };
+
+        window.updateTerms = (field, val) => {
+            state.termsData[field] = val;
+            render();
+        };
+
+        window.confirmStartTrip = async () => {
+            const odo = document.getElementById('start-odo').value;
+            if (!odo) return;
+            if (parseFloat(odo) <= 0) return alert("Please enter a valid positive odometer reading.");
+            if (odo.length !== 6) return alert("Odometer reading must be exactly 6 digits.");
+
+            // Validate against previous reading (auto-filled value)
+            const minOdo = state.isContinuedSession ? (state.lastTripData?.endOdo || 0) : getVehicleOdo(state.form.truck);
+            if (parseFloat(odo) < parseFloat(minOdo)) {
+                return alert(`Start Odometer cannot be less than previous reading (${minOdo}).`);
+            }
+
+            const f = state.form;
+            const pickup = f.pickup === 'Other' ? f.pickupOther : f.pickup;
+            const drop = f.drop === 'Other' ? f.dropOther : f.drop;
+            const model = f.model === 'Other' ? f.modelOther : f.model;
+            try {
+                // Auto-start shift if offline
+                if (state.shiftStatus === 'offline') {
+                    await window.toggleShift();
+                }
+
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'ams_trips'), {
+                    driverName: state.user.name, truckNumber: f.truck, date: f.date, pickupLocation: pickup, dropLocation: drop,
+                    tripCategory: f.cat, tripType: f.cat === 'Empty' ? 'Empty' : f.type, customerName: f.customer || null, referrer: f.referrer || null,
+                    vehicleModel: f.cat === 'Empty' ? null : model, vehicleNumber: f.cat === 'Empty' ? null : f.vehicleNo,
+                    startOdo: odo, status: 'active', startTime: serverTimestamp(), createdAt: serverTimestamp(),
+                    // Terms and Conditions data
+                    termsAccepted: true,
+                    beltCondition: state.termsData.beltCondition,
+                    deliveryChallan: state.termsData.deliveryChallan,
+                    invoiceCopy: state.termsData.invoiceCopy,
+                    eWayBill: state.termsData.eWayBill,
+                    lorryReceipt: state.termsData.lorryReceipt
+                });
+                state.modal = null; render();
+            } catch (error) {
+                console.error("Error starting trip:", error);
+                alert("Failed to start trip. Please check your connection and try again.\nError: " + error.message);
+            }
+        };
+
+        window.confirmStopTrip = async () => {
+            const odo = document.getElementById('end-odo').value;
+            if (!odo) return;
+            if (odo.length !== 6) return alert("Odometer reading must be exactly 6 digits.");
+            if (state.activeTrip && parseFloat(odo) <= parseFloat(state.activeTrip.startOdo)) {
+                return alert(`End Odometer (${odo}) must be greater than Start Odometer (${state.activeTrip.startOdo})`);
+            }
+            if (!state.activeTrip) {
+                return alert("Error: Active trip data missing. Please refresh the page and try again.");
+            }
+            // Capture values BEFORE async call, because onSnapshot might clear state.activeTrip when status changes to 'completed'
+            const currentDrop = state.activeTrip.dropLocation;
+            const currentPickup = state.activeTrip.pickupLocation;
+            const currentTruckRaw = state.activeTrip.truckNumber;
+            const tripId = state.activeTrip.id;
+
+            try {
+                // Update Trip Status
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ams_trips', tripId), { endTime: serverTimestamp(), endOdo: odo, status: 'completed' });
+
+                // Update Vehicle Odometer
+                // Find vehicle ID
+                const vehicle = state.vehicles.find(v => (v.vehicleNumber || v.number) === currentTruckRaw);
+                if (vehicle) {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ams_vehicles', vehicle.id), { odometer: odo });
+                }
+
+                // Snap truck number to vehicle list definition to ensure dropdown match
+                const currentTruck = vehicle ? (vehicle.vehicleNumber || vehicle.number) : currentTruckRaw;
+
+                state.lastTripData = { dropLocation: currentDrop, pickupLocation: currentPickup, truckNumber: currentTruck, endOdo: odo };
+                state.modal = 'postTrip';
+                render();
+            } catch (error) {
+                console.error("Error stopping trip:", error);
+                alert("Failed to stop trip. Please check your connection and try again.\nError: " + error.message);
+            }
+        };
+
+        // --- Driver Trip Editing ---
+        window.openEditTripModal = (tripId) => {
+            const trip = state.trips.find(t => t.id === tripId);
+            if (!trip) return;
+            state.editTrip = { ...trip };
+            state.modal = 'editTrip';
+            render();
+        };
+
+        window.saveTripEdit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const tripData = Object.fromEntries(formData.entries());
+            const tripId = state.editTrip.id;
+
+            if (parseInt(tripData.endOdo) <= parseInt(tripData.startOdo)) {
+                return alert('End Odometer must be greater than Start Odometer');
+            }
+
+            try {
+                // Save as pending changes instead of direct update
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ams_trips', tripId), {
+                    pendingChanges: {
+                        ...tripData,
+                        requestedAt: serverTimestamp(),
+                        requestedBy: state.user.name
+                    },
+                    hasPendingChanges: true,
+                    updatedAt: serverTimestamp()
+                });
+                state.modal = null;
+                render();
+                alert("Edit requested successfully! Wating for Admin approval.");
+            } catch (error) {
+                console.error("Error updating trip:", error);
+                alert("Failed to request update: " + error.message);
+            }
+        };
+
+        window.openTripOptions = (tripId, veh, sOdo, eOdo, date, isLatest) => {
+            const trip = state.trips.find(t => t.id === tripId);
+            if (!trip) return;
+            state.lastTripData = { dropLocation: trip.dropLocation, pickupLocation: trip.pickupLocation, truckNumber: trip.truckNumber, endOdo: trip.endOdo };
+            state.viewTrip = trip; // Store for View Details
+            state.isContinuedSession = true; // Set to true to allow return trip logic to work
+            state.isLatestTrip = isLatest; // Flag for first card options
+            state.modal = 'postTrip';
+            render();
+        };
+
+        window.handleReturnTrip = () => {
+            state.isContinuedSession = true; state.modal = null;
+            const lastDrop = state.lastTripData?.dropLocation || '';
+            const lastPickup = state.lastTripData?.pickupLocation || '';
+
+            const locationNames = state.locations ? state.locations.map(l => l.name) : [];
+            const isStdDrop = locationNames.includes(lastDrop);
+            const isStdPickup = locationNames.includes(lastPickup);
+
+            // Swap locations: New Pickup = Old Drop, New Drop = Old Pickup
+            state.form.pickup = isStdDrop ? lastDrop : 'Other';
+            state.form.pickupOther = isStdDrop ? '' : lastDrop;
+
+            state.form.drop = isStdPickup ? lastPickup : 'Other';
+            state.form.dropOther = isStdPickup ? '' : lastPickup;
+
+            state.form.cat = 'New'; state.form.type = 'TVS';
+            state.form.truck = state.lastTripData?.truckNumber || '';
+            state.form.model = ''; state.form.vehicleNo = ''; state.form.customer = '';
+            render();
+        };
+
+        window.handleContinueSession = () => {
+            state.isContinuedSession = true; state.modal = null;
+            const lastDrop = state.lastTripData?.dropLocation || '';
+            const locationNames = state.locations ? state.locations.map(l => l.name) : [];
+            const isStdLoc = locationNames.includes(lastDrop);
+            state.form.pickup = isStdLoc ? lastDrop : 'Other'; state.form.pickupOther = isStdLoc ? '' : lastDrop;
+            state.form.truck = state.lastTripData?.truckNumber || '';
+            state.form.drop = ''; state.form.dropOther = ''; state.form.cat = 'New'; state.form.type = 'TVS';
+            state.form.model = ''; state.form.vehicleNo = ''; state.form.customer = '';
+            render();
+        };
+
+        window.handleEndDuty = () => {
+            state.isContinuedSession = false; state.lastTripData = null; state.modal = null;
+            state.form = { truck: '', date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0], cat: '', type: '', pickup: '', drop: '', pickupOther: '', dropOther: '', model: '', modelOther: '', vehicleNo: '', customer: '' };
+            render();
+        };
+
+        window.openFineDetails = (fineId) => {
+            const fines = Array.isArray(state.policeFines) ? state.policeFines : [];
+            const fine = fines.find(f => f.id === fineId);
+            if (!fine) {
+                alert('Fine details not found.');
+                return;
+            }
+            state.viewFine = fine;
+            state.modal = 'fineDetails';
+            render();
+        };
+
+        window.submitLeave = async (e) => {
+            e.preventDefault();
+            const start = document.getElementById('leave-start').value;
+            const end = document.getElementById('leave-end').value;
+            const reason = document.getElementById('leave-reason').value;
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'ams_leave_requests'), {
+                driverName: state.user.name, driverPhone: state.user.phone, startDate: start, endDate: end, reason: reason, status: 'pending', createdAt: serverTimestamp()
+            });
+            state.modal = null; render();
+            return false;
+        };
+
+        // Debounce render to avoid UI flicker on rapid updates
+        let renderTimeout = null;
+        const scheduleRender = () => {
+            if (renderTimeout) clearTimeout(renderTimeout);
+            renderTimeout = setTimeout(() => {
+                render();
+                renderTimeout = null;
+            }, 150);
+        };
+
+        // Updated updateForm to use scheduleRender for fields that need UI update
+        window.updateForm = (field, val) => {
+            state.form[field] = val;
+
+            // Auto-fill logic for TVS New category
+            if (field === 'cat' || field === 'type') {
+                if (state.form.cat === 'New' && state.form.type === 'TVS') {
+                    if (!state.form.vehicleNo || state.form.vehicleNo === "") {
+                        state.form.vehicleNo = "ATKMF26006";
+                    }
+                } else {
+                    if (state.form.vehicleNo === "ATKMF26006") {
+                        state.form.vehicleNo = "";
+                    }
+                }
+            }
+
+            const fieldsRequiringRender = ['truck', 'date', 'pickup', 'drop', 'cat', 'type', 'model'];
+            if (fieldsRequiringRender.includes(field)) {
+                scheduleRender();
+            }
+        };
+
+        const renderLogin = () => `
+            <div class="flex items-center justify-center min-h-screen p-6 relative overflow-hidden">
+                <!-- Animated Background Blobs -->
+                <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                     <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float" style="background: #a855f7;"></div>
+                     <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float" style="background: #6366f1; animation-delay: -3s;"></div>
+                </div>
+
+                <div class="glass-strong rounded-[32px] p-8 w-full max-w-sm text-center relative z-10 slide-up border border-white/60 shadow-2xl">
+                    <div class="relative mb-10">
+                        <a href="http://anaamalaismobilityservice.com/" target="_blank" class="block mb-6 group">
+                            <img src="https://www.anaamalaismobilityservice.com/assets/img/logo.png" alt="Anaamalais Mobility Service" class="h-18 max-w-[130px] mx-auto object-contain transition-transform group-hover:scale-105" />
+                        </a>
+                        <h1 class="text-3xl font-extrabold mb-1 tracking-tight text-slate-800">Welcome Back</h1>
+                        <p class="text-slate-500 font-bold text-sm uppercase tracking-wide">AMS Driver Portal</p>
+                    </div>
+
+                    <form onsubmit="return handleLogin(event)" class="space-y-6">
+                        <div class="space-y-2 text-left">
+                            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="ph-bold ph-phone text-slate-400 text-xl group-focus-within:text-indigo-400 transition-colors"></i>
+                                </div>
+                                <input type="tel" id="login-phone" 
+                                    class="w-full pl-12 pr-4 py-4 rounded-xl text-lg font-bold bg-slate-50 text-slate-800 border-2 border-slate-100 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none placeholder-slate-400 shadow-inner"
+                                    placeholder="Enter 10-digit number" 
+                                    required pattern="[0-9]{10}" maxlength="10">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-4 rounded-xl font-bold text-lg text-white shadow-xl shadow-indigo-500/30 btn-primary relative overflow-hidden group hover:scale-[1.02] active:scale-95 transition-all">
+                            <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                            <span class="relative flex items-center justify-center gap-2">
+                                <span>Start Shift</span>
+                                <i class="ph-bold ph-arrow-right"></i>
+                            </span>
+                        </button>
+                    </form>
+
+                    <div class="mt-8 pt-6 border-t border-slate-100">
+                        <div class="flex items-center justify-center gap-2 text-xs font-bold text-slate-400 mb-4">
+                            <i class="ph-fill ph-shield-check text-green-500 text-sm"></i>
+                            <span>Secure System 2.0</span>
+                        </div>
+                         <div class="inline-block px-4 py-2 rounded-xl bg-slate-50 border border-slate-100">
+                             <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-0.5">Developed by</p>
+                             <p class="text-xs font-black text-indigo-600">Anaamalais Digital Service</p>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+        const renderHome = () => {
+            // Filter trips/expenses from the last 36 hours
+            const now = new Date();
+            const timeLimit = new Date(now.getTime() - (36 * 60 * 60 * 1000));
+
+            // Merge all history items
+            const trips = state.trips.filter(t => t.status === 'completed').map(t => ({ ...t, dataType: 'trip' }));
+            const fines = (state.policeFines || []).map(f => ({ ...f, dataType: 'fine' }));
+            const tolls = (state.tollLogs || []).map(t => ({ ...t, dataType: 'toll' }));
+
+            let allHistory = [...trips, ...fines, ...tolls].filter(item => {
+                const t = item.timestamp ? new Date(item.timestamp.seconds * 1000) : new Date(item.createdAt?.seconds * 1000 || 0);
+                return t >= timeLimit;
+            });
+
+            // Sort by time descending
+            allHistory.sort((a, b) => {
+                const ta = a.timestamp ? a.timestamp.seconds : (a.createdAt?.seconds || 0);
+                const tb = b.timestamp ? b.timestamp.seconds : (b.createdAt?.seconds || 0);
+                return tb - ta;
+            });
+
+            // Identify trips with fines
+            const fineMap = {};
+            fines.forEach(f => { if (f.tripId) fineMap[f.tripId] = f; });
+
+            // Filter history to show ONLY trips (as requested)
+            const recentHistory = allHistory.filter(item => item.dataType === 'trip');
+
+            return `
+                <div class="space-y-6 pb-32 pt-2 px-2">
+                    <!-- Welcome Header -->
+                    <div class="flex items-center justify-between px-1">
+                        <div>
+                            <p class="text-slate-500 dark:text-slate-400 font-medium text-sm mb-0.5">Good Morning,</p>
+                            <h2 class="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">${state.user.name.split(' ')[0]}</h2>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white shadow-lg shadow-indigo-500/20">
+                            <div class="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl">
+                                ${state.user.name.charAt(0)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Duty Status Card -->
+                    <div class="glass-panel p-1 rounded-[28px] relative transition-all duration-500 group overflow-hidden ${state.shiftStatus === 'online' ? 'border-green-500/30' : 'border-slate-200'}">
+                        <div class="rounded-[24px] p-5 relative overflow-hidden bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+                            <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                                <i class="ph-fill ph-steering-wheel text-9xl"></i>
+                            </div>
+                            
+                            <div class="relative z-10 flex flex-col gap-4">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm transition-colors duration-500 ${state.shiftStatus === 'online' ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}">
+                                            <i class="ph-fill ${state.shiftStatus === 'online' ? 'ph-toggle-right' : 'ph-toggle-left'} text-3xl"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-xl font-bold ${state.shiftStatus === 'online' ? 'text-slate-800 dark:text-white' : 'text-slate-500'}">
+                                                ${state.shiftStatus === 'online' ? 'On Duty' : 'Off Duty'}
+                                            </h3>
+                                            <p class="text-xs font-bold uppercase tracking-wider ${state.shiftStatus === 'online' ? 'text-green-500' : 'text-slate-400'}">
+                                                ${state.shiftStatus === 'online' ? 'Active & Visible' : 'Inactive'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    ${state.shiftStatus === 'online' ? `
+                                        <div class="px-2 py-1 rounded-lg bg-green-50 text-green-600 border border-green-100 flex items-center gap-1.5 animate-pulse">
+                                            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                            <span class="text-[10px] font-bold uppercase">Live</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+
+                                <button onclick="toggleShift()" ${state.activeTrip ? 'disabled' : ''} class="w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${state.shiftStatus === 'online' ? 'bg-red-600 text-white shadow-lg shadow-red-500/30 hover:bg-red-700' : 'btn-primary text-white shadow-lg shadow-indigo-500/30'} ${state.activeTrip ? 'opacity-50 cursor-not-allowed' : 'active:scale-95'}">
+                                    <i class="ph-bold ph-power text-lg"></i>
+                                    ${state.shiftStatus === 'online' ? 'End Shift' : 'Start Duty'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Trip or Content -->
+                    <div class="animate-slide-up" style="animation-duration: 0.5s;">
+                         ${state.activeTrip ? renderActiveTrip() : renderNewTripForm()}
+                    </div>
+
+                    <!-- Quick Services (Only shown if NOT in active trip mode, or just always show?) -->
+                    <!-- Providing quick access is good -->
+                    <div>
+                        <h3 class="font-bold text-slate-800 dark:text-white px-2 mb-3 mt-2 flex items-center gap-2 text-sm uppercase tracking-wider opacity-80">
+                             <i class="ph-duotone ph-squares-four text-indigo-500"></i> Quick Access
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="state.driverTab='fuel'; render()" class="glass-panel p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-white/60 transition-all active:scale-95 border-b-[3px] border-b-blue-500/10 hover:border-b-blue-500">
+                                <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-1">
+                                    <i class="ph-fill ph-gas-pump text-2xl"></i>
+                                </div>
+                                <span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Add Fuel</span>
+                            </button>
+                            <button onclick="state.driverTab='maintenance'; render()" class="glass-panel p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-white/60 transition-all active:scale-95 border-b-[3px] border-b-orange-500/10 hover:border-b-orange-500">
+                                <div class="w-12 h-12 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center mb-1">
+                                    <i class="ph-fill ph-wrench text-2xl"></i>
+                                </div>
+                                <span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Maintenance</span>
+                            </button>
+                            <button onclick="state.driverTab='expenses'; state.expensesMode='police'; render()" class="glass-panel p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-white/60 transition-all active:scale-95 border-b-[3px] border-b-red-500/10 hover:border-b-red-500">
+                                <div class="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-1">
+                                    <i class="ph-fill ph-siren text-2xl"></i>
+                                </div>
+                                <span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Police Fine</span>
+                            </button>
+                            <button onclick="state.driverTab='attendance'; render()" class="glass-panel p-4 rounded-2xl flex flex-col items-center gap-2 hover:bg-white/60 transition-all active:scale-95 border-b-[3px] border-b-purple-500/10 hover:border-b-purple-500">
+                                <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mb-1">
+                                    <i class="ph-fill ph-calendar-check text-2xl"></i>
+                                </div>
+                                <span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Attendance</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div>
+                         <div class="flex items-center justify-between px-2 mb-3">
+                            <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wider opacity-80">
+                                <i class="ph-duotone ph-clock-counter-clockwise text-indigo-500"></i> Recent Activity
+                            </h3>
+                            <span class="text-[10px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full border border-slate-200 dark:border-slate-700">${recentHistory.length} today</span>
+                        </div>
+                        <div class="space-y-3">
+                            ${recentHistory.length === 0 ? `
+                                <div class="glass-panel p-8 rounded-2xl text-center border-2 border-dashed border-slate-200 dark:border-slate-700 opacity-60">
+                                    <i class="ph-duotone ph-chart-polar text-4xl text-slate-400 mb-2"></i>
+                                    <p class="text-slate-400 font-medium text-sm">No activity recorded today</p>
+                                </div>
+                            ` : ''}
+                            ${recentHistory.map((item, index) => {
+                const linkedFine = fineMap[item.id];
+                return `
+                                <div class="glass-panel p-4 rounded-2xl hover-lift dark:bg-slate-800 border border-transparent hover:border-indigo-100 transition-all">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${item.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">
+                                                    ${item.status}
+                                                </span>
+                                                <span class="text-xs font-bold text-slate-400">${formatTime(item.timestamp)}</span>
+                                            </div>
+                                            <div class="font-bold text-slate-800 dark:text-slate-100 text-base mb-1">${item.vehicleModel || 'Empty Run'} <span class="text-slate-400 font-normal ml-1">#${item.vehicleNumber || 'N/A'}</span></div>
+                                            <div class="text-xs text-slate-500 dark:text-slate-400 flex flex-col gap-1">
+                                                <div class="flex items-center gap-1.5"><i class="ph-fill ph-map-pin text-indigo-500"></i> <span class="truncate max-w-[150px]">${item.pickupLocation}</span></div>
+                                                <div class="pl-0.5 ml-1 border-l border-dashed border-slate-300 h-2"></div>
+                                                <div class="flex items-center gap-1.5"><i class="ph-fill ph-navigation-arrow text-purple-500"></i> <span class="truncate max-w-[150px]">${item.dropLocation}</span></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex flex-col gap-2 items-end">
+                                            <button onclick="openTripOptions('${item.id}', '${item.vehicleNumber || ''}', '${item.startOdo || ''}', '${item.endOdo || ''}', '${item.date || ''}', ${index === 0})" class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                                                <i class="ph-bold ph-dots-three-vertical"></i>
+                                            </button>
+                                            ${linkedFine ? `<span class="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center"><i class="ph-fill ph-siren text-xs"></i></span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>`;
+            }).join('')}
+                        </div>
+                    </div>
+                </div>`;
+        };
+
+        const renderActiveTrip = () => `
+            <div class="glass-panel rounded-[28px] overflow-hidden border border-indigo-500/20 shadow-2xl shadow-indigo-500/10 relative group">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                
+                <div class="relative p-6 text-white overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-600">
+                    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                    <div class="relative flex justify-between items-start z-10">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1 opacity-90">
+                                <span class="animate-pulse w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50"></span>
+                                <span class="text-xs font-bold uppercase tracking-widest">Live Trip</span>
+                            </div>
+                            <h2 class="font-extrabold text-2xl tracking-tight leading-tight">
+                                ${state.activeTrip.vehicleModel || 'Special Run'}
+                            </h2>
+                            <p class="text-indigo-100 font-medium text-sm mt-0.5 opacity-90">
+                                ${state.activeTrip.vehicleNumber || 'No ID'}
+                            </p>
+                        </div>
+                        <div class="glass-dark px-3 py-1.5 rounded-xl border border-white/10 backdrop-blur-md">
+                            <span class="text-sm font-mono font-bold">${formatTime(state.activeTrip.startTime)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+                    <div class="relative pl-6 space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gradient-to-b before:from-indigo-500 before:to-purple-500 before:opacity-30">
+                        <div class="relative">
+                            <div class="absolute -left-[29px] top-1 w-6 h-6 rounded-full border-4 border-white dark:border-slate-800 bg-indigo-500 shadow-sm z-10 flex items-center justify-center">
+                                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                            </div>
+                            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Pickup Point</p>
+                            <p class="font-bold text-slate-800 dark:text-white text-lg leading-snug">${state.activeTrip.pickupLocation}</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-[29px] top-1 w-6 h-6 rounded-full border-4 border-white dark:border-slate-800 bg-purple-500 shadow-sm z-10 flex items-center justify-center">
+                                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                            </div>
+                            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Drop Location</p>
+                            <p class="font-bold text-slate-800 dark:text-white text-lg leading-snug">${state.activeTrip.dropLocation}</p>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="state.modal='stopTrip'; render()" class="w-full py-4 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-xl relative overflow-hidden transition-all hover-lift active:scale-95 group bg-red-600">
+                        <span class="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                        <span class="relative z-10 flex items-center gap-2">
+                            <i class="ph-bold ph-stop-circle text-2xl"></i> Stop Trip
+                        </span>
+                    </button>
+                </div>
+            </div>`;
+
+        const renderNewTripForm = () => {
+            if (state.shiftStatus === 'offline') return `
+            <div class="glass-panel p-8 rounded-[28px] text-center border border-slate-200 dark:border-slate-700 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-slate-100/50 dark:bg-slate-800/50 backdrop-blur-sm"></div>
+                <div class="relative z-10 py-4">
+                    <div class="w-20 h-20 rounded-3xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center mx-auto mb-6 shadow-inner">
+                        <i class="ph-fill ph-coffee text-4xl text-slate-400 dark:text-slate-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-700 dark:text-slate-200 mb-2">You are Off Duty</h3>
+                    <p class="text-slate-500 dark:text-slate-400 font-medium text-sm max-w-[200px] mx-auto">Start your shift above to begin logging trips.</p>
+                </div>
+            </div>`;
+            const f = state.form;
+
+            // Get all vehicles for the user's branch
+            const userBranch = state.user.branch || 'Coimbatore';
+            const branchVehicles = state.vehicles ? state.vehicles.filter(v => (v.branch || 'Coimbatore') === userBranch) : [];
+
+            // Get all active trips for determining lock status
+            const activeTrips = state.allActiveTrips || [];
+            const lockedMap = new Map();
+            activeTrips.forEach(t => {
+                if (t.truckNumber && t.status === 'active') {
+                    lockedMap.set(t.truckNumber, t.driverName || 'In Use');
+                }
+            });
+
+            // Categorize branch vehicles into available or locked
+            const availableOptionsArr = [];
+            const lockedOptionsArr = [];
+
+            branchVehicles.forEach(v => {
+                const vNum = v.vehicleNumber || v.number;
+                const driverOnTrip = lockedMap.get(vNum);
+
+                if (driverOnTrip) {
+                    lockedOptionsArr.push(`<option value="${vNum}" disabled>🔒 ${vNum} (${driverOnTrip})</option>`);
+                } else {
+                    availableOptionsArr.push(`<option value="${vNum}" ${f.truck === vNum ? 'selected' : ''}>${vNum}</option>`);
+                }
+            });
+
+            const vehicleOptions = availableOptionsArr.join('') + lockedOptionsArr.join('') || '<option disabled>Loading...</option>';
+
+            const ub = state.user.branch || 'Coimbatore';
+            const branchLocations = state.locations ? state.locations.filter(l => {
+                // Multi-branch support
+                if (l.branches && Array.isArray(l.branches)) {
+                    return l.branches.includes('All') || l.branches.includes(ub);
+                }
+                const lb = l.branch || 'All';
+                return lb === 'All' || lb === ub;
+            }).sort((a, b) => a.name.localeCompare(b.name)) : [];
+            const locationOptions = (selected) => branchLocations.map(l => `<option value="${l.name}" ${selected === l.name ? 'selected' : ''}>${l.name}</option>`).join('');
+
+            return `
+            <div class="glass-panel rounded-[28px] p-6 border border-slate-200 dark:border-slate-700">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2 px-1">
+                    <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center"><i class="ph-fill ph-play-circle text-lg"></i></span>
+                    ${state.isContinuedSession ? 'Continue Session' : 'New Trip Entry'}
+                </h2>
+                
+                <form onsubmit="return openStartTripModal(event)" class="space-y-5">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2 sm:col-span-1">
+                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">Vehicle</label>
+                             <div class="relative">
+                                <select onchange="updateForm('truck', this.value)" class="glass-input w-full p-3.5 pr-8 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none appearance-none" required ${state.isContinuedSession && f.truck ? 'disabled' : ''}>
+                                    <option value="">Select Truck...</option>${vehicleOptions}
+                                </select>
+                                <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                             </div>
+                        </div>
+                        <div class="col-span-2 sm:col-span-1">
+                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">Date</label>
+                             ${state.isContinuedSession ?
+                    `<input type="text" value="${f.date.split('-').reverse().join('-')}" class="glass-input w-full p-3.5 rounded-xl font-bold text-slate-500 bg-slate-100 opacity-70 cursor-not-allowed" disabled>` :
+                    `<input type="date" value="${f.date}" oninput="updateForm('date', this.value)" class="glass-input w-full p-3.5 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none" required>`
+                }
+                        </div>
+                    </div>
+
+                    <div class="bg-indigo-50/50 dark:bg-slate-800/50 rounded-2xl p-4 border border-indigo-100/50 dark:border-slate-700/50 space-y-4">
+                        ${state.isContinuedSession ?
+                    '<div class="flex items-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-100 px-3 py-2 rounded-lg mb-2"><i class="ph-bold ph-magic-wand"></i> Pickup location auto-filled from last drop</div>' : ''}
+                        
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="relative group">
+                                <i class="ph-fill ph-map-pin absolute left-4 top-3.5 text-indigo-400 text-lg group-focus-within:text-indigo-600 transition-colors"></i>
+                                <select onchange="updateForm('pickup', this.value)" class="glass-input w-full pl-11 p-3.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 outline-none appearance-none bg-white" required>
+                                    <option value="">Select Pickup Location</option>${locationOptions(f.pickup)}<option value="Other" ${f.pickup === 'Other' ? 'selected' : ''}>+ Other Location</option>
+                                </select>
+                                <i class="ph-bold ph-caret-down absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
+                            </div>
+                            ${f.pickup === 'Other' ? `<input type="text" value="${f.pickupOther}" oninput="updateForm('pickupOther', this.value)" placeholder="Enter Pickup Location Name" class="glass-input w-full p-3.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 outline-none animate-fade-in" required>` : ''}
+                            
+                            <div class="relative group">
+                                <i class="ph-fill ph-navigation-arrow absolute left-4 top-3.5 text-purple-400 text-lg group-focus-within:text-purple-600 transition-colors"></i>
+                                <select onchange="updateForm('drop', this.value)" class="glass-input w-full pl-11 p-3.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 outline-none appearance-none bg-white" required>
+                                    <option value="">Select Drop Location</option>${locationOptions(f.drop)}<option value="Other" ${f.drop === 'Other' ? 'selected' : ''}>+ Other Location</option>
+                                </select>
+                                <i class="ph-bold ph-caret-down absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
+                            </div>
+                            ${f.drop === 'Other' ? `<input type="text" value="${f.dropOther}" oninput="updateForm('dropOther', this.value)" placeholder="Enter Drop Location Name" class="glass-input w-full p-3.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 outline-none animate-fade-in" required>` : ''}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Trip Category</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            ${Object.keys(CATEGORIES).map(k => {
+                        const catVal = CATEGORIES[k].length === 0 ? 'Empty' : (k === 'NEW' ? 'New' : 'Break Down');
+                        const catLabel = CATEGORIES[k].length === 0 ? 'Empty' : (k === 'NEW' ? 'New' : 'Break');
+                        const isActive = f.cat === catVal;
+                        return `
+                                <button type="button" onclick="updateForm('cat', '${catVal}'); updateForm('type', '')" class="py-3 px-2 rounded-xl text-xs font-bold border transition-all ${isActive ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-500/30' : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-slate-300'}">
+                                    ${catLabel}
+                                </button>`;
+                    }).join('')}
+                        </div>
+                    </div>
+
+                    ${(f.cat === 'New' || f.cat === 'Break Down') ? `
+                    <div class="space-y-5 animate-slide-up">
+                        <div class="glass-panel p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Trip Type</label>
+                            <div class="flex flex-wrap gap-2">
+                                ${(f.cat === 'New' ? CATEGORIES.NEW : CATEGORIES.BREAKDOWN).map(t => `
+                                <button type="button" onclick="updateForm('type', '${t}')" class="px-4 py-2 rounded-lg text-xs font-bold border transition-all ${f.type === t ? 'bg-slate-800 text-white border-slate-800' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'}">
+                                    ${t}
+                                </button>`).join('')}
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Vehicle Model</label>
+                                <div class="relative">
+                                    <select onchange="updateForm('model', this.value)" class="glass-input w-full p-3 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 outline-none appearance-none" required>
+                                        <option value="">Select</option>${(state.models && state.models.length ? state.models.map(m => m.name) : TOYOTA_MODELS).map(m => `<option value="${m}" ${f.model === m ? 'selected' : ''}>${m}</option>`).join('')}<option value="Other" ${f.model === 'Other' ? 'selected' : ''}>Other</option>
+                                    </select>
+                                    <i class="ph-bold ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                                </div>
+                                ${f.model === 'Other' ? `<input type="text" value="${f.modelOther}" oninput="updateForm('modelOther', this.value)" placeholder="Model Name" class="glass-input w-full mt-2 p-3 rounded-xl text-sm outline-none" required>` : ''}
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Vehicle No.</label>
+                                <input type="text" value="${f.vehicleNo}" oninput="updateForm('vehicleNo', this.value.toUpperCase())" placeholder="ABC-1234" class="glass-input w-full p-3 rounded-xl font-mono text-sm font-bold text-slate-700 dark:text-slate-200 outline-none uppercase" required>
+                            </div>
+                        </div>
+
+                        ${(f.cat === 'New' || (f.cat === 'Break Down' && (f.type === 'Service' || f.type === 'Direct' || f.type === 'TVS'))) ? (() => {
+                        const isRequired = f.cat === 'Break Down' && (f.type === 'Service' || f.type === 'Direct');
+                        return `
+                            <div class="grid grid-cols-1 gap-4">
+                                <div class="relative">
+                                    <i class="ph-bold ph-user absolute left-3.5 top-3.5 text-slate-400"></i>
+                                    <input type="text" value="${f.customer}" oninput="updateForm('customer', this.value)" placeholder="Customer Name ${isRequired ? '' : '(Optional)'}" class="glass-input w-full pl-10 p-3.5 rounded-xl text-sm font-semibold outline-none" ${isRequired ? 'required' : ''}>
+                                </div>
+                                <div class="relative">
+                                    <i class="ph-bold ph-identification-card absolute left-3.5 top-3.5 text-slate-400"></i>
+                                    <input type="text" value="${f.referrer || ''}" oninput="updateForm('referrer', this.value)" placeholder="Referred By ${isRequired ? '' : '(Optional)'}" class="glass-input w-full pl-10 p-3.5 rounded-xl text-sm font-semibold outline-none" ${isRequired ? 'required' : ''}>
+                                </div>
+                            </div>`;
+                    })() : ''}
+                    </div>` : ''}
+
+                    <button type="submit" class="w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-95 transition-all mt-4 relative overflow-hidden group btn-primary">
+                        <span class="relative z-10 flex items-center justify-center gap-2">Proceed <i class="ph-bold ph-arrow-right"></i></span>
+                    </button>
+                </form>
+            </div>`;
+        };
+
+
+        const renderCalendar = (records, trips) => {
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const attMap = {}; records.forEach(r => attMap[r.date] = r.status);
+            const tripCountMap = {}; trips.forEach(t => { if (t.status === 'completed' && t.date.startsWith(now.toISOString().slice(0, 7))) tripCountMap[t.date] = (tripCountMap[t.date] || 0) + 1; });
+            let cal = '<div class="grid grid-cols-7 gap-1 mt-4">';
+            for (let i = 1; i <= daysInMonth; i++) {
+                const d = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                cal += `<div class="aspect-square flex flex-col items-center justify-center rounded-lg text-xs ${attMap[d] === 'online' ? 'bg-green-100 text-green-700 font-bold border border-green-200' : 'bg-slate-100 text-slate-400'} relative">${i}${tripCountMap[d] > 0 ? `<span class="absolute top-0 right-0 h-4 w-4 bg-blue-600 text-white text-[9px] flex items-center justify-center rounded-full -mt-1 -mr-1 shadow-sm font-bold">${tripCountMap[d]}</span>` : ''}</div>`;
+            }
+            return cal + '</div>';
+        };
+
+        window.renderFuel = () => {
+            const userBranch = state.user?.branch || 'All';
+            const vehicles = (state.vehicles || []).filter(v => v.branch === userBranch);
+
+            return `
+            <div class="animate-fade-in pb-32">
+                 <div class="glass-panel p-6 rounded-[28px] mb-8 relative overflow-hidden group border border-blue-100 dark:border-blue-900/30">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-50"></div>
+                    <div class="absolute -right-6 -top-6 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
+                    
+                    <div class="relative z-10 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">Fuel Log</h2>
+                            <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">Record fuel entries for ${userBranch}</p>
+                        </div>
+                        <div class="w-14 h-14 rounded-2xl bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 rotate-3 group-hover:rotate-6 transition-transform duration-500">
+                             <i class="ph-fill ph-gas-pump text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <form onsubmit="return submitFuel(event)" class="space-y-6">
+                    <div class="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-slate-700 space-y-5">
+                        <div class="grid grid-cols-2 gap-4">
+                             <div class="col-span-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">Select Vehicle</label>
+                                <div class="relative">
+                                    <select name="vehicleNumber" required class="glass-input w-full p-4 pr-10 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none appearance-none" style="background-image: none;">
+                                        <option value="">Choose Vehicle...</option>
+                                        ${vehicles.map(v => `<option value="${v.vehicleNumber || v.number}">${v.vehicleNumber || v.number} (${v.make || 'Truck'})</option>`).join('')}
+                                    </select>
+                                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                </div>
+                             </div>
+                             
+                             <div class="col-span-2 sm:col-span-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">Date</label>
+                                <div class="relative">
+                                    <input type="date" name="date" required value="${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]}" class="glass-input w-full p-3.5 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none">
+                                </div>
+                             </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 pt-2">
+                            <div class="relative group">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Fuel Amount (L)</label>
+                                <div class="relative">
+                                    <i class="ph-bold ph-drop absolute left-3.5 top-3.5 text-blue-400 text-lg"></i>
+                                    <input type="number" step="0.01" name="litres" required placeholder="0.00" class="glass-input w-full pl-10 p-3.5 rounded-xl font-bold font-mono text-lg text-slate-700 dark:text-slate-200 outline-none focus:border-blue-400 transition-colors">
+                                </div>
+                            </div>
+                            
+                            <div class="relative group">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Odometer</label>
+                                <div class="relative">
+                                    <i class="ph-bold ph-gauge absolute left-3.5 top-3.5 text-blue-400 text-lg"></i>
+                                    <input type="number" name="odometer" required placeholder="0" class="glass-input w-full pl-10 p-3.5 rounded-xl font-bold font-mono text-lg text-slate-700 dark:text-slate-200 outline-none focus:border-blue-400 transition-colors">
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 text-right italic pr-1">* This entry will be logged for tracking purposes.</p>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/30 flex items-center justify-center gap-2 transition-all hover-lift active:scale-95 group relative overflow-hidden bg-blue-600">
+                        <span class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                        <span class="relative flex items-center gap-2">
+                            <i class="ph-bold ph-check-circle text-xl"></i> Submit Entry
+                        </span>
+                    </button>
+                </form>
+            </div>
+            `;
+        };
+
+        window.toggleMaint = (btn, type) => {
+            const isActive = btn.classList.contains('active');
+            if (isActive) {
+                // Deactivate
+                btn.classList.remove('active');
+                btn.className = "flex-1 py-3 px-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold text-xs transition-all hover:bg-slate-50 dark:hover:bg-slate-700";
+                if (btn.dataset.value === 'Other') {
+                    document.getElementById(type + 'OtherInput').classList.add('hidden');
+                }
+            } else {
+                // Activate
+                btn.classList.add('active');
+                btn.className = "flex-1 py-3 px-2 rounded-xl border font-bold text-xs transition-all bg-red-600 text-white border-red-600 shadow-lg shadow-red-500/30 transform scale-[1.02] active";
+                if (btn.dataset.value === 'Other') {
+                    document.getElementById(type + 'OtherInput').classList.remove('hidden');
+                    document.getElementById(type + 'OtherInput').focus();
+                }
+            }
+        };
+
+        window.renderMaintenance = () => {
+            const userBranch = state.user?.branch || 'All';
+            const vehicles = (state.vehicles || []).filter(v => v.branch === userBranch);
+            const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            const btnClass = "flex-1 py-3 px-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold text-xs transition-all hover:bg-slate-50 dark:hover:bg-slate-700";
+
+            return `
+            <div class="animate-fade-in pb-32">
+                 <div class="glass-panel p-6 rounded-[28px] mb-8 relative overflow-hidden group border border-red-100 dark:border-red-900/30">
+                    <div class="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-50"></div>
+                    <div class="absolute -right-6 -top-6 w-32 h-32 bg-red-500/20 rounded-full blur-2xl"></div>
+                    
+                    <div class="relative z-10 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">Maintenance</h2>
+                            <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">Report repairs & service</p>
+                        </div>
+                        <div class="w-14 h-14 rounded-2xl bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-500/30 rotate-3 group-hover:rotate-6 transition-transform duration-500">
+                             <i class="ph-fill ph-wrench text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <form onsubmit="return submitMaintenance(event)" class="space-y-6">
+                    <div class="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-slate-700">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">Select Vehicle</label>
+                        <div class="relative">
+                            <select name="vehicleNumber" required class="glass-input w-full p-4 pr-10 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none appearance-none">
+                                <option value="">Choose Vehicle...</option>
+                                ${vehicles.map(v => `<option value="${v.vehicleNumber || v.number}">${v.vehicleNumber || v.number} (${v.make || 'Truck'})</option>`).join('')}
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-slate-700 space-y-6">
+                        <!-- General Maintenance -->
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2.5 block">General Maintenance</label>
+                            <div class="flex flex-wrap gap-2" id="general-opts">
+                                ${['AdBlue', 'Service', 'Breakdown', 'Washing', 'Greasing', 'Other'].map(item => `
+                                    <button type="button" onclick="toggleMaint(this, 'general')" data-value="${item}" class="${btnClass}">${item}</button>
+                                `).join('')}
+                            </div>
+                            <input type="text" id="generalOtherInput" name="generalOther" placeholder="Specify other general issue..." class="glass-input w-full mt-3 p-3.5 rounded-xl text-sm font-semibold hidden animate-fade-in outline-none">
+                        </div>
+
+                        <!-- Tyre Maintenance -->
+                        <div class="pt-6 border-t border-slate-100 dark:border-slate-700/50">
+                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2.5 block">Tyre Maintenance</label>
+                            <div class="flex flex-wrap gap-2" id="tyre-opts">
+                                ${['Puncture', 'Flap Replace', 'Powder Coating', 'Wheel Alignment', 'Other'].map(item => `
+                                    <button type="button" onclick="toggleMaint(this, 'tyre')" data-value="${item}" class="${btnClass}">${item}</button>
+                                `).join('')}
+                            </div>
+                            <input type="text" id="tyreOtherInput" name="tyreOther" placeholder="Specify other tyre issue..." class="glass-input w-full mt-3 p-3.5 rounded-xl text-sm font-semibold hidden animate-fade-in outline-none">
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-slate-700 space-y-5">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2.5 block">Details</label>
+                            <div class="space-y-4">
+                                <div class="relative group">
+                                    <i class="ph-bold ph-currency-inr absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-red-500 transition-colors text-lg"></i>
+                                    <input type="number" name="price" placeholder="Cost (Rs.)" class="glass-input w-full pl-10 p-3.5 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none">
+                                </div>
+                                <div class="relative group">
+                                    <i class="ph-bold ph-map-pin absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-red-500 transition-colors text-lg"></i>
+                                    <input type="text" name="place" required placeholder="Workshop / Location Name" class="glass-input w-full pl-10 p-3.5 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none">
+                                </div>
+                                <div class="relative group">
+                                    <i class="ph-bold ph-calendar-blank absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-red-500 transition-colors text-lg"></i>
+                                    <input type="date" name="date" required value="${today}" class="glass-input w-full pl-10 p-3.5 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none">
+                                </div>
+                                <div class="relative group">
+                                    <i class="ph-bold ph-gauge absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-red-500 transition-colors text-lg"></i>
+                                    <input type="text" name="odometer" placeholder="Current Odometer" class="glass-input w-full pl-10 p-3.5 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none">
+                                </div>
+                                <div>
+                                    <textarea name="remarks" placeholder="Additional Remarks (Optional)" rows="3" class="glass-input w-full p-4 rounded-xl font-medium text-slate-700 dark:text-slate-200 outline-none resize-none"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl shadow-red-500/30 flex items-center justify-center gap-2 transition-all hover-lift active:scale-95 group relative overflow-hidden bg-red-600">
+                        <span class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                        <span class="relative flex items-center gap-2">
+                            <i class="ph-bold ph-check-circle text-xl"></i> Submit Report
+                        </span>
+                    </button>
+                </form>
+            </div>
+            `;
+        };
+
+        window.submitMaintenance = async (e) => {
+            e.preventDefault();
+            if (!state.user) return;
+
+            const formData = new FormData(e.target);
+
+            // Gather selected buttons
+            const generalBtns = Array.from(document.querySelectorAll('#general-opts button.active'));
+            const general = generalBtns.map(b => b.dataset.value);
+            if (general.includes('Other')) {
+                const otherIdx = general.indexOf('Other');
+                const otherText = document.getElementById('generalOtherInput').value;
+                if (otherText) general[otherIdx] = `Other: ${otherText} `;
+            }
+
+            const tyreBtns = Array.from(document.querySelectorAll('#tyre-opts button.active'));
+            const tyre = tyreBtns.map(b => b.dataset.value);
+            if (tyre.includes('Other')) {
+                const otherIdx = tyre.indexOf('Other');
+                const otherText = document.getElementById('tyreOtherInput').value;
+                if (otherText) tyre[otherIdx] = `Other: ${otherText} `;
+            }
+
+            if (general.length === 0 && tyre.length === 0) {
+                alert("Please select at least one maintenance item.");
+                return false;
+            }
+
+            const data = {
+                vehicleNumber: formData.get('vehicleNumber'),
+                general: general,
+                tyre: tyre,
+                place: formData.get('place'),
+                date: formData.get('date'),
+                price: formData.get('price'),
+                odometer: formData.get('odometer'),
+                remarks: formData.get('remarks'),
+
+                driverName: state.user.name,
+                driverId: state.user.id || state.user.phone,
+                timestamp: serverTimestamp(),
+                createdAt: serverTimestamp()
+            };
+
+            try {
+                const btn = e.target.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Saving...';
+                btn.disabled = true;
+
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'ams_maintenance_logs'), data);
+
+                alert("Maintenance report saved successfully!");
+                e.target.reset();
+                // Reset buttons
+                document.querySelectorAll('#general-opts button, #tyre-opts button').forEach(b => {
+                    b.classList.remove('active');
+                    b.className = "flex-1 py-3 px-2 rounded-xl border border-slate-200 bg-white text-slate-500 font-medium transition-all hover:bg-slate-50";
+                });
+                document.getElementById('generalOtherInput').classList.add('hidden');
+                document.getElementById('tyreOtherInput').classList.add('hidden');
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+
+            } catch (error) {
+                console.error("Error logging maintenance:", error);
+                alert("Failed to save report. Please try again.");
+                const btn = e.target.querySelector('button[type="submit"]');
+                btn.innerHTML = '<i class="ph-bold ph-check-circle"></i> Submit Report';
+                btn.disabled = false;
+            }
+            return false;
+        };
+
+        window.openFineDetails = (fineId) => {
+            const fine = state.policeFines.find(f => f.id === fineId) || state.tollLogs.find(t => t.id === fineId);
+            if (!fine) return;
+            state.viewFine = fine;
+            state.modal = 'fineDetails';
+            render();
+        };
+
+        const renderFineDetailsModal = () => {
+            const fine = state.viewFine;
+            if (!fine) return '';
+            const isPolice = fine.type === 'police' || fine.dataType === 'fine';
+            const themeColor = isPolice ? 'red' : 'blue';
+
+            return `
+            <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onclick="state.modal=null; render()"></div>
+                <div class="relative w-full max-w-sm glass-strong rounded-[32px] p-6 shadow-2xl scale-in overflow-hidden border border-white/20">
+                    <div class="absolute inset-0 bg-gradient-to-br from-${themeColor}-500/5 to-transparent pointer-events-none"></div>
+                    
+                    <div class="text-center mb-8 relative z-10">
+                        <div class="w-20 h-20 rounded-3xl bg-${themeColor}-100 dark:bg-${themeColor}-900/30 text-${themeColor}-600 mx-auto flex items-center justify-center mb-4 shadow-inner">
+                            <i class="ph-fill ${isPolice ? 'ph-siren' : 'ph-road-horizon'} text-4xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${isPolice ? 'Police Fine Details' : 'Toll Expenses'}</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">${formatDate(fine.timestamp)} • ${formatTime(fine.timestamp)}</p>
+                    </div>
+
+                    <div class="space-y-4 mb-8 relative z-10">
+                        <div class="glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                             <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Amount Paid</div>
+                             <div class="text-3xl font-bold text-slate-800 dark:text-white font-mono">₹${fine.amount}</div>
+                        </div>
+                        
+                         <div class="glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                             <div class="flex justify-between items-center mb-2">
+                                <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Approval Status</div>
+                                <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide ${fine.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
+                                    ${fine.status || 'Pending'}
+                                </span>
+                             </div>
+                             ${fine.adminComments ? `
+                             <div class="mt-3 text-sm text-slate-600 dark:text-slate-300 pt-3 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 -mx-5 -mb-5 p-4 rounded-b-2xl">
+                                <span class="font-bold text-xs text-slate-400 block mb-1">Admin Comment:</span>
+                                "${fine.adminComments}"
+                             </div>` : ''}
+                        </div>
+                    </div>
+
+                    <button onclick="state.modal=null; render()" class="relative z-10 w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm">
+                        Close Details
+                    </button>
+                </div>
+            </div>`;
+        };
+
+        window.renderExpenses = () => {
+            if (!state.expensesMode) {
+                return `
+                <div class="animate-fade-in pb-32 pt-2 px-1">
+                     <div class="glass-panel text-center p-8 rounded-[32px] mb-8 relative overflow-hidden group border border-slate-200 dark:border-slate-700">
+                        <div class="absolute inset-0 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 opacity-50"></div>
+                        <div class="relative z-10">
+                            <div class="w-20 h-20 rounded-3xl bg-indigo-50 dark:bg-slate-700 text-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                                <i class="ph-fill ph-wallet text-4xl"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">My Expenses</h2>
+                            <p class="text-slate-500 dark:text-slate-400 font-medium max-w-[200px] mx-auto">Select a category below to log a new expense</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-4">
+                        <button onclick="state.expensesMode='police'; render()" class="glass-panel p-6 rounded-[28px] flex items-center gap-5 hover:bg-white/80 transition-all active:scale-95 group border border-red-100 dark:border-red-900/30 relative overflow-hidden text-left">
+                            <div class="absolute right-0 top-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                            <div class="w-16 h-16 rounded-2xl bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-siren text-3xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xl text-slate-800 dark:text-white mb-1">Police Fine</h3>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Traffic violations & challans</p>
+                            </div>
+                            <div class="ml-auto w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:bg-red-500 group-hover:text-white transition-colors">
+                                <i class="ph-bold ph-caret-right text-lg"></i>
+                            </div>
+                        </button>
+
+                        <button onclick="state.expensesMode='toll'; render()" class="glass-panel p-6 rounded-[28px] flex items-center gap-5 hover:bg-white/80 transition-all active:scale-95 group border border-blue-100 dark:border-blue-900/30 relative overflow-hidden text-left">
+                           <div class="absolute right-0 top-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                            <div class="w-16 h-16 rounded-2xl bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-road-horizon text-3xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xl text-slate-800 dark:text-white mb-1">Toll Gate</h3>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Log toll payments (Hidden)</p>
+                            </div>
+                             <div class="ml-auto w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                                <i class="ph-bold ph-caret-right text-lg"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                `;
+            }
+
+            const isPolice = state.expensesMode === 'police';
+            const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            const themeColor = isPolice ? 'red' : 'blue';
+
+            return `
+            <div class="animate-fade-in pb-32">
+                <div class="px-2 mb-6 flex items-center gap-3">
+                    <button onclick="state.expensesMode=null; render()" class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 active:scale-90 transition-transform"><i class="ph-bold ph-arrow-left"></i></button>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white">${isPolice ? 'Police Fine' : 'Toll Gate'}</h2>
+                </div>
+
+                <div class="glass-panel p-6 rounded-[28px] mb-8 relative overflow-hidden group border border-${themeColor}-100 dark:border-${themeColor}-900/30">
+                    <div class="absolute inset-0 bg-gradient-to-br from-${themeColor}-500/10 to-transparent opacity-50"></div>
+                    <div class="absolute -right-6 -top-6 w-32 h-32 bg-${themeColor}-500/20 rounded-full blur-2xl"></div>
+                    
+                    <div class="relative z-10 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">${isPolice ? 'New Challan' : 'Toll Entry'}</h2>
+                            <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">${isPolice ? 'Enter fine details' : 'Record toll expense'}</p>
+                        </div>
+                        <div class="w-14 h-14 rounded-2xl bg-${themeColor}-500 text-white flex items-center justify-center shadow-lg shadow-${themeColor}-500/30 rotate-3 group-hover:rotate-6 transition-transform duration-500">
+                             <i class="ph-fill ${isPolice ? 'ph-siren' : 'ph-road-horizon'} text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <form onsubmit="return submitExpense(event, '${state.expensesMode}')" class="space-y-6">
+                    <div class="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-slate-700 space-y-5">
+                        <div class="relative group">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">Date & Time</label>
+                            <div class="relative">
+                                <i class="ph-bold ph-calendar-blank absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-${themeColor}-500 transition-colors text-lg"></i>
+                                <input type="datetime-local" name="date" required value="${today}" class="glass-input w-full pl-10 p-3.5 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-${themeColor}-400 transition-all">
+                            </div>
+                        </div>
+                        
+                        <div class="relative group">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">Amount (₹)</label>
+                            <div class="relative">
+                                <i class="ph-bold ph-currency-inr absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-${themeColor}-500 transition-colors text-lg"></i>
+                                <input type="number" name="amount" required placeholder="0" class="glass-input w-full pl-10 p-3.5 rounded-xl font-bold text-2xl text-slate-700 dark:text-slate-200 outline-none focus:border-${themeColor}-400 transition-all">
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center gap-3">
+                             <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center">
+                                <i class="ph-bold ph-link text-lg"></i>
+                             </div>
+                             <div>
+                                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Linked To</div>
+                                 <div class="font-bold text-slate-700 dark:text-slate-200 text-sm">
+                                    ${state.viewTrip ? `Trip: ${state.viewTrip.pickupLocation}` : (state.activeTrip ? `Active Trip: ${state.activeTrip.pickupLocation}` : 'General Expense (No Trip)')}
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl shadow-${themeColor}-500/30 flex items-center justify-center gap-2 transition-all hover-lift active:scale-95 group relative overflow-hidden bg-${themeColor}-600">
+                        <span class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                        <span class="relative flex items-center gap-2">
+                            <i class="ph-bold ph-check-circle text-xl"></i> Save Entry
+                        </span>
+                    </button>
+                </form>
+            </div>
+            `;
+        };
+
+        window.submitExpense = async (e, type) => {
+            e.preventDefault();
+            if (!state.user) return;
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            const collectionName = type === 'police' ? 'ams_police_fines' : 'ams_toll_logs';
+
+            try {
+                const btn = e.target.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Saving...';
+                btn.disabled = true;
+
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', collectionName), {
+                    ...data,
+                    driverName: state.user.name,
+                    driverId: state.user.id || state.user.phone,
+                    branch: state.user.branch || 'Unknown',
+                    tripId: state.viewTrip?.id || state.activeTrip?.id || null,
+                    pickup: state.viewTrip?.pickupLocation || state.activeTrip?.pickupLocation || null,
+                    drop: state.viewTrip?.dropLocation || state.activeTrip?.dropLocation || null,
+                    vehicleNumber: state.viewTrip?.vehicleNumber || state.activeTrip?.vehicleNumber || (state.viewTrip?.truckNumber || null),
+                    type: type,
+                    timestamp: serverTimestamp(),
+                    createdAt: serverTimestamp()
+                });
+
+                alert("Entry saved successfully!");
+                e.target.reset();
+                state.expensesMode = null; // Go back to menu
+                render();
+
+            } catch (error) {
+                console.error("Error logging expense:", error);
+                alert("Failed to save entry. Please try again.");
+                const btn = e.target.querySelector('button[type="submit"]');
+                btn.innerHTML = '<i class="ph-bold ph-check-circle"></i> Save Entry';
+                btn.disabled = false;
+            }
+            return false;
+        };
+
+        window.submitFuel = async (e) => {
+            e.preventDefault();
+            if (!state.user) return;
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                // Show loading state (optional UI enhancement)
+                const btn = e.target.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Saving...';
+                btn.disabled = true;
+
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'ams_fuel_logs'), {
+                    ...data,
+                    driverName: state.user.name,
+                    driverId: state.user.id || state.user.phone,
+                    // date: taken from form data
+                    timestamp: serverTimestamp(),
+                    createdAt: serverTimestamp()
+                });
+
+                alert("Fuel entry recorded successfully!");
+                e.target.reset(); // Clear form
+
+                // Reset button
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+
+            } catch (error) {
+                console.error("Error logging fuel:", error);
+                alert("Failed to save fuel log. Please try again.");
+                const btn = e.target.querySelector('button[type="submit"]');
+                btn.innerHTML = '<i class="ph-bold ph-check-circle"></i> Submit Entry';
+                btn.disabled = false;
+            }
+            return false;
+        };
+
+        const renderAttendance = () => `
+            <div class="space-y-6 pb-24">
+                <div class="glass-panel p-6 rounded-[28px] border border-slate-200 dark:border-slate-700">
+                     <div class="flex justify-between items-center mb-4">
+                        <h2 class="font-bold text-xl text-slate-800 dark:text-white flex items-center gap-2">
+                            <i class="ph-fill ph-calendar-check text-blue-600 text-2xl"></i> Attendance
+                        </h2>
+                    </div>
+                    ${renderCalendar(state.monthlyAttendance, state.trips)}
+                </div>
+
+                <button type="button" onclick="state.modal='applyLeave'; render()" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2 transition-all active:scale-95 group relative overflow-hidden">
+                    <span class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                    <span class="relative z-10 flex items-center gap-2">
+                        <i class="ph-bold ph-file-text"></i> Apply for Leave
+                    </span>
+                </button>
+
+                <div>
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">Leave Requests</h3>
+                    <div class="space-y-3">
+                        ${state.leaveRequests.length ? state.leaveRequests.map(r => `
+                        <div class="glass-panel p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-start">
+                            <div>
+                                <div class="text-sm font-bold text-slate-800 dark:text-white mb-0.5">
+                                    ${r.startDate} <span class="text-slate-400 font-normal text-xs mx-1">to</span> ${r.endDate}
+                                </div>
+                                <div class="text-xs text-slate-500 font-medium italic">"${r.reason}"</div>
+                            </div>
+                            <div>
+                                <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide ${r.status === 'approved' ? 'bg-green-100 text-green-700' : (r.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700')}">
+                                    ${r.status}
+                                </span>
+                            </div>
+                        </div>`).join('') : '<div class="text-center text-slate-400 py-6 text-sm font-medium">No recent leave requests</div>'}
+                    </div>
+                </div>
+            </div>`;
+
+        const renderModals = () => {
+            if (!state.modal) return '';
+            let content = '';
+            if (state.modal === 'termsConditions') {
+                const td = state.termsData || {};
+                content = `
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 rounded-3xl mx-auto mb-4 flex items-center justify-center bg-amber-500 text-white shadow-xl shadow-amber-500/20">
+                        <i class="ph-fill ph-clipboard-text text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Trip Checklist</h3>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Confirm these items before starting</p>
+                </div>
+                
+                <div class="space-y-6 mb-8">
+                    <button type="button" onclick="updateTerms('beltCondition', !state.termsData.beltCondition)" class="w-full p-4 rounded-xl flex items-center gap-4 transition-all ${td.beltCondition ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-500 text-green-700 dark:text-green-400' : 'bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-500'}" style="box-shadow: var(--shadow-sm);">
+                        <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${td.beltCondition ? 'border-green-500 bg-green-500 text-white' : 'border-slate-300 dark:border-slate-600'}">
+                            ${td.beltCondition ? '<i class="ph-bold ph-check text-base"></i>' : ''}
+                        </div>
+                        <span class="font-bold text-lg">Belt Condition Checked</span>
+                    </button>
+
+                    <div class="bg-indigo-50/50 dark:bg-slate-800 rounded-2xl p-5 border border-indigo-100 dark:border-slate-700 space-y-5">
+                        ${['deliveryChallan', 'invoiceCopy', 'eWayBill', 'lorryReceipt'].map(field => `
+                            <div>
+                                <div class="flex justify-between items-center mb-2.5">
+                                    <label class="text-sm font-bold text-slate-700 dark:text-slate-300 capitalize">${field.replace(/([A-Z])/g, ' $1').trim()}</label>
+                                    ${td[field] ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded ${td[field] === 'Yes' ? 'bg-green-100 text-green-700' : (td[field] === 'No' ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600')}">${td[field]}</span>` : ''}
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    ${['Yes', 'No', 'NA'].map(opt => `
+                                        <button type="button" onclick="updateTerms('${field}', '${opt}')" class="py-2.5 px-2 rounded-lg text-xs font-bold border transition-all ${td[field] === opt ? (opt === 'Yes' ? 'border-green-500 bg-green-500 text-white shadow-md' : (opt === 'No' ? 'border-red-500 bg-red-500 text-white shadow-md' : 'border-slate-500 bg-slate-500 text-white shadow-md')) : 'border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50'}">
+                                            ${opt}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <button type="button" onclick="state.modal=null; render()" class="flex-1 py-4 rounded-xl font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+                    <button type="button" onclick="acceptTerms()" class="flex-1 py-4 text-white rounded-xl font-bold shadow-xl shadow-amber-500/20 bg-amber-500 hover:bg-amber-600 transition-all active:scale-95">I Agree</button>
+                </div>`;
+            }
+            else if (state.modal === 'startTrip') content = `
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 rounded-3xl mx-auto mb-4 flex items-center justify-center bg-indigo-500 text-white shadow-xl shadow-indigo-500/30">
+                        <i class="ph-fill ph-gauge text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Start Odometer</h3>
+                    ${state.isContinuedSession ? '<div class="inline-flex items-center gap-1 mt-2 text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-md"><i class="ph-bold ph-magic-wand"></i> Auto-filled from last trip</div>' : '<p class="text-sm font-medium text-slate-500 mt-1">Confirm initial reading</p>'}
+                </div>
+                <div class="relative group mb-8">
+                     <i class="ph-bold ph-speedometer absolute left-5 top-1/2 -translate-y-1/2 text-2xl text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                     <input type="number" id="start-odo" readonly value="${state.isContinuedSession ? (state.lastTripData?.endOdo || '') : getVehicleOdo(state.form.truck)}" class="w-full pl-14 p-5 border-2 border-indigo-100 dark:border-indigo-900/30 rounded-2xl text-3xl font-mono font-bold bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500/50 shadow-inner" placeholder="0">
+                </div>
+                <div class="flex gap-4">
+                    <button type="button" onclick="state.modal=null; render()" class="flex-1 py-4 rounded-xl font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+                    <button type="button" onclick="confirmStartTrip()" class="flex-1 py-4 text-white rounded-xl font-bold btn-primary shadow-xl shadow-indigo-500/30">Start Trip</button>
+                </div>`;
+
+            else if (state.modal === 'stopTrip') content = `
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 rounded-3xl mx-auto mb-4 flex items-center justify-center bg-red-500 text-white shadow-xl shadow-red-500/30">
+                        <i class="ph-fill ph-stop-circle text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">End Odometer</h3>
+                    <p class="text-sm font-medium text-slate-500 mt-1">Enter final reading to finish</p>
+                </div>
+                <div class="relative group mb-8">
+                    <i class="ph-bold ph-speedometer absolute left-5 top-1/2 -translate-y-1/2 text-2xl text-slate-400 group-focus-within:text-red-500 transition-colors"></i>
+                    <input type="number" id="end-odo" class="w-full pl-14 p-5 border-2 border-red-100 dark:border-slate-700 rounded-2xl text-3xl font-mono font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all shadow-sm" placeholder="123456" autofocus onkeydown="if(['e','E','+','-','.'].includes(event.key)) event.preventDefault()">
+                </div>
+                <div class="flex gap-4">
+                    <button type="button" onclick="state.modal=null; render()" class="flex-1 py-4 rounded-xl font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+                    <button type="button" onclick="confirmStopTrip()" class="flex-1 py-4 text-white rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-500/30 active:scale-95 transition-all">Stop Trip</button>
+                </div>`;
+
+            else if (state.modal === 'postTrip') content = `
+                    <div class="text-center">
+                        ${state.viewTrip ? `
+                        <div class="w-20 h-20 rounded-3xl mx-auto mb-4 flex items-center justify-center bg-indigo-600 text-white shadow-xl shadow-indigo-500/30">
+                             <i class="ph-bold ph-list text-4xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Trip Options</h2>
+                        ` : `
+                        <div class="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center bg-green-500 text-white shadow-2xl shadow-green-500/30 animate-bounce-slow">
+                            <i class="ph-bold ph-check text-5xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Trip Completed!</h2>
+                        <p class="text-slate-500 dark:text-slate-400 font-medium mb-8">Great job. Ensure all logs are updated.</p>
+                        `}
+
+                        ${(!state.viewTrip || state.isLatestTrip) ? `
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <button type="button" onclick="handleContinueSession()" class="group relative overflow-hidden p-5 rounded-2xl shadow-lg transition-all hover:-translate-y-1 active:scale-95 text-left bg-gradient-to-br from-indigo-500 to-indigo-700 text-white">
+                                <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/3 -translate-y-1/3"><i class="ph-fill ph-arrow-clockwise text-7xl"></i></div>
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-3 backdrop-blur-sm"><i class="ph-bold ph-arrow-clockwise text-2xl"></i></div>
+                                <div class="font-bold text-lg leading-tight">Continue<br>Trip</div>
+                            </button>
+                            <button type="button" onclick="handleReturnTrip()" class="group relative overflow-hidden p-5 rounded-2xl shadow-lg transition-all hover:-translate-y-1 active:scale-95 text-left bg-gradient-to-br from-pink-500 to-rose-600 text-white">
+                                <div class="absolute right-0 top-0 opacity-10 transform translate-x-1/3 -translate-y-1/3"><i class="ph-fill ph-arrows-left-right text-7xl"></i></div>
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-3 backdrop-blur-sm"><i class="ph-bold ph-arrows-left-right text-2xl"></i></div>
+                                <div class="font-bold text-lg leading-tight">Return<br>Trip</div>
+                            </button>
+                        </div>
+                        ` : ''}
+
+                        ${state.viewTrip ? `
+                        <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 mb-6 border border-slate-100 dark:border-slate-700">
+                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 text-left">Quick Actions</div>
+                             <div class="grid grid-cols-2 gap-3">
+                                <button type="button" onclick="state.driverTab='expenses'; state.expensesMode='police'; state.modal=null; render()" class="p-4 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 hover:text-red-600 transition-all font-bold text-sm text-slate-600 dark:text-slate-300 shadow-sm"><i class="ph-fill ph-siren text-2xl text-red-500"></i> Report Fine</button>
+                                <button type="button" onclick="state.driverTab='expenses'; state.expensesMode='toll'; state.modal=null; render()" class="p-4 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-200 dark:hover:border-blue-800 hover:text-blue-600 transition-all font-bold text-sm text-slate-600 dark:text-slate-300 shadow-sm"><i class="ph-fill ph-road-horizon text-2xl text-blue-500"></i> Report Toll</button>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        ${(!state.viewTrip || state.isLatestTrip) ? `
+                        <button type="button" onclick="handleEndDuty()" class="w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl shadow-green-500/30 flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all mb-4 bg-gradient-to-r from-emerald-500 to-green-600 border-t border-white/20">
+                            <i class="ph-bold ph-check-circle text-xl"></i> Finish & End Duty
+                        </button>
+                        ` : ''}
+
+                        ${state.viewTrip ? `
+                        <div class="grid grid-cols-2 gap-3">
+                             <button type="button" onclick="state.modal='viewTrip'; render()" class="w-full py-3.5 bg-indigo-50 dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 rounded-xl font-bold hover:bg-indigo-100 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2"><i class="ph-bold ph-eye"></i> View Details</button>
+                             <button type="button" onclick="state.modal=null; render()" class="w-full py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">Close</button>
+                        </div>
+                       ` : `<button type="button" onclick="state.modal='viewTrip'; render()" class="w-full py-4 text-slate-500 font-bold hover:text-slate-800 transition-colors">View Trip Details</button>`}
+                    </div>`;
+            else if (state.modal === 'applyLeave') content = `
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 rounded-3xl mx-auto mb-4 flex items-center justify-center bg-amber-500 text-white shadow-xl shadow-amber-500/30">
+                        <i class="ph-fill ph-calendar-plus text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Apply for Leave</h3>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Select dates and reason</p>
+                </div>
+                <form onsubmit="return submitLeave(event)" class="space-y-5">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="relative group">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">From Date</label>
+                            <input type="date" id="leave-start" class="glass-input w-full p-3.5 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-amber-400 transition-all" required>
+                        </div>
+                        <div class="relative group">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">To Date</label>
+                            <input type="date" id="leave-end" class="glass-input w-full p-3.5 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-amber-400 transition-all" required>
+                        </div>
+                    </div>
+                    <div class="relative group">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">Reason</label>
+                        <textarea id="leave-reason" class="glass-input w-full p-4 rounded-xl font-medium text-slate-700 dark:text-slate-200 outline-none h-24 resize-none focus:border-amber-400 transition-all" placeholder="Enter reason for leave..." required></textarea>
+                    </div>
+                    <div class="flex gap-4 mt-8">
+                        <button type="button" onclick="state.modal=null; render()" class="flex-1 py-4 rounded-xl font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+                        <button type="submit" class="flex-1 py-4 text-white rounded-xl font-bold shadow-xl shadow-amber-500/30 bg-amber-500 hover:bg-amber-600 transition-all active:scale-95">Submit Request</button>
+                    </div>
+                </form>`;
+            else if (state.modal === 'viewTrip') {
+                const t = state.viewTrip || {};
+                const row = (l, v, i) => `<div class="flex justify-between py-3 border-b border-slate-100 dark:border-slate-700/50 last:border-0 items-center"><span class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-2">${i ? `<i class="ph-bold ${i} text-slate-300"></i>` : ''}${l}</span><span class="text-sm font-bold text-slate-700 dark:text-slate-200 text-right">${v || '-'}</span></div>`;
+                content = `
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 shadow-sm">
+                            <i class="ph-fill ph-receipt text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-white">Trip Details</h3>
+                        <p class="text-xs text-slate-400 font-mono mt-1">#${t.id.slice(-6).toUpperCase()}</p>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-0 mb-6 overflow-hidden border border-slate-200 dark:border-slate-700">
+                        <div class="p-5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Vehicle Number</span>
+                                <h2 class="text-xl font-bold text-slate-800 dark:text-white font-mono tracking-tight">${t.truckNumber || t.vehicleNumber}</h2>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase bg-white dark:bg-slate-700 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 shadow-sm">${t.tripType || 'TVS'}</span>
+                        </div>
+                        <div class="p-5 space-y-0.5">
+                            ${row('Date', t.date, 'ph-calendar-blank')}
+                            ${row('Status', `<span class="uppercase font-bold text-[10px] px-2 py-1 rounded-md ${t.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">${t.status}</span>`, 'ph-circle-notch')}
+                            ${row('Driver', t.driverName, 'ph-user')}
+                            ${row('Start Odo', t.startOdo, 'ph-gauge')}
+                            ${row('End Odo', t.endOdo, 'ph-flag-checkered')}
+                            ${row('Pickup', t.pickupLocation, 'ph-map-pin')}
+                            ${row('Drop', t.dropLocation, 'ph-map-pin-line')}
+                        </div>
+                    </div>
+                     <button type="button" onclick="state.modal='postTrip'; render()" class="w-full py-4 bg-slate-800 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold shadow-lg hover-lift transition-all">Back to Options</button>
+                    `;
+            }
+            else if (state.modal === 'editTrip') {
+                const t = state.editTrip || {};
+                content = `
+                    <div class="text-center mb-8">
+                        <div class="w-20 h-20 rounded-3xl mx-auto mb-4 flex items-center justify-center bg-indigo-500 text-white shadow-xl shadow-indigo-500/30">
+                            <i class="ph-fill ph-pencil-simple text-4xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Edit Trip</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Updating details for ${t.truckNumber || 'Vehicle'}</p>
+                    </div>
+                    <form onsubmit="return saveTripEdit(event)" class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="relative group">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">Start Odo</label>
+                                <input type="number" name="startOdo" value="${t.startOdo}" class="glass-input w-full p-4 rounded-xl font-bold font-mono text-lg text-slate-700 dark:text-slate-200 outline-none focus:border-indigo-400 transition-all" required>
+                            </div>
+                            <div class="relative group">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">End Odo</label>
+                                <input type="number" name="endOdo" value="${t.endOdo}" class="glass-input w-full p-4 rounded-xl font-bold font-mono text-lg text-slate-700 dark:text-slate-200 outline-none focus:border-indigo-400 transition-all" required>
+                            </div>
+                        </div>
+                        ${t.tripCategory === 'Break Down' ? `
+                        <div class="space-y-4 pt-2">
+                             <div class="relative group">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">Start Location</label>
+                                <input type="text" name="pickupLocation" value="${t.pickupLocation}" class="glass-input w-full p-4 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-indigo-400 transition-all" required>
+                             </div>
+                             <div class="relative group">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 mb-1.5 block">End Location</label>
+                                <input type="text" name="dropLocation" value="${t.dropLocation}" class="glass-input w-full p-4 rounded-xl font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-indigo-400 transition-all" required>
+                             </div>
+                        </div>` : ''}
+                        <div class="flex gap-4 mt-8">
+                            <button type="button" onclick="state.modal=null; render()" class="flex-1 py-4 rounded-xl font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+                            <button type="submit" class="flex-1 py-4 text-white rounded-xl font-bold btn-primary shadow-xl shadow-indigo-500/30">Save Changes</button>
+                        </div>
+                    </form>`;
+            }
+
+            if (state.modal === 'fineDetails') return renderFineDetailsModal();
+
+            else if (state.modal === 'requestSecondShift') content = `
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 rounded-3xl mx-auto mb-4 flex items-center justify-center bg-amber-500 text-white shadow-xl shadow-amber-500/30">
+                        <i class="ph-fill ph-clock text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Extra Shift Request</h3>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Start another shift today?</p>
+                </div>
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 mb-8">
+                    <div class="flex gap-3">
+                         <i class="ph-fill ph-info text-amber-600 dark:text-amber-400 text-xl flex-shrink-0 mt-0.5"></i>
+                         <div>
+                            <p class="text-amber-800 dark:text-amber-200 text-sm font-bold mb-1">Admin Approval Required</p>
+                            <p class="text-amber-700 dark:text-amber-300 text-xs leading-relaxed">Starting a second shift in the same day requires explicit approval from your fleet manager.</p>
+                         </div>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <button type="button" onclick="state.modal=null; render()" class="flex-1 py-4 rounded-xl font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+                    <button type="button" onclick="submitShiftRequest()" class="flex-1 py-4 text-white rounded-xl font-bold bg-amber-500 hover:bg-amber-600 shadow-xl shadow-amber-500/30 transition-all active:scale-95">Request Approval</button>
+                </div>`;
+            else if (state.modal === 'shiftRequestPending') content = `
+                <div class="text-center mb-6">
+                    <div class="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center bg-amber-100 text-amber-600 animate-pulse ring-8 ring-amber-50">
+                        <i class="ph-fill ph-hourglass-medium text-5xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Approval Pending</h3>
+                    <p class="text-slate-500 dark:text-slate-400 font-medium text-sm mt-2 max-w-[260px] mx-auto">Your request is awaiting fleet manager approval. Please wait.</p>
+                    <button type="button" onclick="state.modal=null; render()" class="mt-8 w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Close</button>
+                </div>`;
+            else if (state.modal === 'customAlert') content = `
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 rounded-3xl mx-auto mb-4 flex items-center justify-center bg-slate-800 text-white shadow-xl shadow-slate-500/30">
+                         <i class="ph-fill ph-info text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Notice</h3>
+                    <p class="text-slate-600 dark:text-slate-300 text-lg mt-3 font-medium leading-relaxed px-2">${state.alertMessage || 'Something went wrong.'}</p>
+                </div>
+                <button type="button" onclick="state.modal=null; render()" class="w-full py-4 text-white rounded-2xl font-bold shadow-xl flex items-center justify-center bg-slate-900 hover:bg-slate-800 transition-all">
+                    Okay, Got it
+                </button>`;
+
+            return `<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"><div class="glass-strong rounded-[32px] p-8 w-full max-w-md relative overflow-hidden scale-in border border-white/20 shadow-2xl">${content}</div></div>`;
+        };
+
+
+
+        window.render = () => {
+            modalDiv.innerHTML = renderModals();
+
+            if (!state.user) {
+                appDiv.innerHTML = renderLogin();
+                return;
+            }
+
+            // --- PREMIUM SHELL STRATEGY ---
+            let header = document.getElementById('app-header');
+            let main = document.getElementById('app-main');
+            let nav = document.getElementById('app-nav');
+            let bgLayer = document.getElementById('bg-layer');
+
+            if (!header || !main || !nav) {
+                // Initialize Shell with sophisticated LIGHT background
+                appDiv.innerHTML = `
+                    <div id="bg-layer" class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                        <div class="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full mix-blend-multiply filter blur-[80px] opacity-40 bg-purple-200 animate-float"></div>
+                        <div class="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full mix-blend-multiply filter blur-[80px] opacity-40 bg-indigo-200 animate-float" style="animation-delay: -3s"></div>
+                        <div class="absolute top-[40%] left-[20%] w-[300px] h-[300px] rounded-full mix-blend-multiply filter blur-[60px] opacity-30 bg-blue-100 animate-float" style="animation-delay: -5s"></div>
+                    </div>
+                    <header id="app-header" class="fixed top-0 left-0 right-0 z-40 px-6 py-4 glass transition-all duration-300 border-b border-slate-200 shadow-sm" style="background: rgba(255, 255, 255, 0.85);"></header>
+                    <main id="app-main" class="relative z-10 max-w-3xl mx-auto w-full min-h-screen pt-24 pb-32 px-4 transition-all duration-300"></main>
+                    <nav id="app-nav" class="fixed bottom-6 left-6 right-6 z-40 glass rounded-[24px] p-2 flex justify-between items-center shadow-2xl border border-white/60 backdrop-blur-xl max-w-md mx-auto" style="background: rgba(255, 255, 255, 0.9);"></nav>
+                `;
+                // Re-select elements
+                header = document.getElementById('app-header');
+                main = document.getElementById('app-main');
+                nav = document.getElementById('app-nav');
+                bgLayer = document.getElementById('bg-layer');
+            }
+
+            // 1. HEADER CONTENT (Light Theme)
+            header.innerHTML = `
+                <div class="max-w-3xl mx-auto flex items-center justify-between w-full">
+                    <div class="flex items-center gap-3">
+                        <a href="http://anaamalaismobilityservice.com/" target="_blank" class="flex items-center gap-2 group">
+                            <img src="https://www.anaamalaismobilityservice.com/assets/img/logo.png" alt="Anaamalais Mobility Service" class="h-4 max-w-[45px] object-contain opacity-60 group-hover:opacity-100 transition-opacity" />
+                        </a>
+                        <div>
+                            <h1 class="font-bold text-lg text-slate-800 leading-tight">Driver Portal</h1>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full ${state.shiftStatus === 'online' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-slate-400'}"></span>
+                                <p class="text-[10px] font-bold text-slate-500 tracking-wide uppercase">${state.shiftStatus === 'online' ? 'Online' : 'Offline'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                         <div class="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 flex items-center gap-2">
+                            <i class="ph-fill ph-sun text-amber-500"></i>
+                            <span class="text-xs font-bold text-slate-600">Light Mode</span>
+                        </div>
+                        <button onclick="handleLogout()" class="w-10 h-10 rounded-xl bg-red-50 hover:bg-red-100 flex items-center justify-center transition-all active:scale-95 text-red-500 border border-red-100">
+                            <i class="ph-bold ph-power text-lg"></i>
+                        </button>
+                    </div>
+                </div>`;
+
+            // 2. MAIN CONTENT
+            const mainContent = state.driverTab === 'home' ? renderHome() : (state.driverTab === 'attendance' ? renderAttendance() : (state.driverTab === 'fuel' ? renderFuel() : (state.driverTab === 'maintenance' ? renderMaintenance() : renderExpenses())));
+            main.innerHTML = mainContent + `
+                <div class="text-center py-8 pb-32">
+                    <div class="inline-block px-5 py-3 rounded-2xl bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 backdrop-blur-md shadow-sm">
+                        <p class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-0.5">Developed by</p>
+                        <p class="text-sm font-black text-indigo-600 dark:text-indigo-400">Anaamalais Digital Service</p>
+                    </div>
+                </div>`;
+
+            // 3. NAV CONTENT (Floating Dock Style - Light Theme)
+            const navBtn = (id, icon, label) => `
+                <button type="button" onclick="state.driverTab='${id}'; render()" class="relative flex-1 group">
+                    <div class="flex flex-col items-center gap-1 p-2 transition-all duration-300">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${state.driverTab === id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 scale-110 -translate-y-2' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}">
+                            <i class="ph-fill ${icon} text-2xl"></i>
+                        </div>
+                        <span class="text-[10px] font-bold transition-all duration-300 ${state.driverTab === id ? 'text-indigo-900 translate-y-0 opacity-100' : 'text-transparent translate-y-2 opacity-0 absolute bottom-0'}">${label}</span>
+                    </div>
+                    ${state.driverTab === id ? '<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-600"></div>' : ''}
+                </button>
+            `;
+
+            nav.className = "fixed bottom-6 left-6 right-6 z-50 glass rounded-[32px] p-2 flex justify-between items-center shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] border border-white/60 backdrop-blur-xl max-w-sm mx-auto bg-white/90";
+            nav.innerHTML = `
+                ${navBtn('home', 'ph-house', 'Home')}
+                ${navBtn('attendance', 'ph-calendar-check', 'Status')}
+                ${navBtn('fuel', 'ph-gas-pump', 'Fuel')}
+                ${navBtn('maintenance', 'ph-wrench', 'Maint.')}
+            `;
+
+            // Remove dark mode class if present
+            document.documentElement.classList.remove('dark');
+            state.darkMode = false; // Force state
+        };
+
+        // COMPREHENSIVE AUTO-REFRESH PREVENTION
+
+        // 1. Prevent all form submissions from refreshing the page
+        // 1. Prevent all form submissions from refreshing the page
+        document.addEventListener('submit', (e) => {
+            console.log('Form submission prevented');
+            e.preventDefault();
+            // Do NOT stop propagation, otherwise specific form handlers like handleLogin won't run
+            // e.stopPropagation(); 
+            return false;
+        }, true);
+
+        // 2. Prevent all link clicks from navigating
+        document.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A' || e.target.closest('a')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+
+        // 3. Prevent any accidental page navigation
+        window.addEventListener('beforeunload', (e) => {
+            // Only prevent if user is logged in and has active data
+            if (state.user && state.activeTrip) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+
+        // 4. Prevent browser back button from refreshing
+        window.history.pushState(null, '', window.location.href);
+        window.addEventListener('popstate', (e) => {
+            window.history.pushState(null, '', window.location.href);
+            e.preventDefault();
+            return false;
+        });
+
+        // 5. Log any page load to debug
+        console.log('Driver App loaded at:', new Date().toISOString());
+        let renderCount = 0;
+        const originalRender = window.render;
+        let globalRenderTimeout = null;
+        window.render = function () {
+            if (globalRenderTimeout) clearTimeout(globalRenderTimeout);
+            globalRenderTimeout = setTimeout(() => {
+                renderCount++;
+                originalRender.apply(this, arguments);
+                globalRenderTimeout = null;
+            }, 100);
+        };
+
+        initAuth();
+    </script>
+</body>
+
+</html>
