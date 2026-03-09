@@ -34,6 +34,18 @@
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
+        /* Remove number input spinners */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
         :root {
             /* Premium Light Theme */
             --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
@@ -322,6 +334,15 @@
             darkMode: false
         };
 
+        // Check persistent login
+        try {
+            const savedUser = localStorage.getItem('driver_user');
+            if (savedUser) {
+                state.user = JSON.parse(savedUser);
+                state.view = 'driver';
+            }
+        } catch (e) { console.error("Error restoring session", e); }
+
         // Initialize Theme
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
@@ -374,7 +395,8 @@
             if (u) {
                 loadingScreen.style.opacity = '0';
                 setTimeout(() => { loadingScreen.style.display = 'none'; }, 500);
-                if (!state.user) render();
+                if (state.user) setupListeners();
+                render();
             }
         });
 
@@ -463,28 +485,76 @@
 
             const tlQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_toll_logs'), where('driverName', '==', state.user.name));
             unsubscribers.push(onSnapshot(tlQ, (s) => { state.tollLogs = s.docs.map(d => ({ id: d.id, ...d.data(), dataType: 'toll' })); render(); }));
+
+            // --- LIVE TRACKING LISTENER ---
+            const trackQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_live_tracking_requests'),
+                where('driverPhone', '==', state.user.phone),
+                where('status', '==', 'pending')
+            );
+
+            unsubscribers.push(onSnapshot(trackQ, (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === 'added' || change.type === 'modified') {
+                        const req = change.doc.data();
+                        const reqId = change.doc.id;
+                        console.log("Tracking Request Received:", reqId);
+
+                        // Check if permission is granted
+                        if ("geolocation" in navigator) {
+                            navigator.geolocation.getCurrentPosition(async (position) => {
+                                console.log("Sending Location:", position.coords);
+                                try {
+                                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ams_live_tracking_requests', reqId), {
+                                        lat: position.coords.latitude,
+                                        lng: position.coords.longitude,
+                                        accuracy: position.coords.accuracy,
+                                        heading: position.coords.heading || 0,
+                                        speed: position.coords.speed || 0,
+                                        status: 'responded',
+                                        respondedAt: serverTimestamp()
+                                    });
+                                    // Optional: Show toast to driver? Maybe keep it silent for now as requested.
+                                } catch (err) {
+                                    console.error("Failed to send location", err);
+                                }
+                            }, (err) => {
+                                console.error("GPS Error", err);
+                                // Report error back to admin
+                                updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'ams_live_tracking_requests', reqId), {
+                                    status: 'error',
+                                    error: err.message,
+                                    respondedAt: serverTimestamp()
+                                }).catch(console.error);
+                            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+                        }
+                    }
+                });
+            }));
         };
 
         window.handleLogin = async (e) => {
             e.preventDefault();
             if (!auth.currentUser) await initAuth();
-            const phone = document.getElementById('login-phone').value.trim();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value.trim();
             const btn = e.target.querySelector('button');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Verifying...';
             btn.disabled = true;
 
             try {
-                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_drivers'), where('phone', '==', phone), where('status', '==', 'Active'));
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'ams_drivers'), where('username', '==', username), where('password', '==', password), where('status', '==', 'Active'));
                 const snapshot = await getDocs(q);
 
                 if (!snapshot.empty) {
                     const docData = snapshot.docs[0].data();
-                    state.user = { name: docData.name, role: 'driver', phone: docData.phone, id: snapshot.docs[0].id, branch: docData.branch || 'Coimbatore' };
+                    const user = { name: docData.name, role: 'driver', phone: docData.phone, id: snapshot.docs[0].id, branch: docData.branch || 'Coimbatore' };
+                    state.user = user;
                     state.view = 'driver';
+                    localStorage.setItem('driver_user', JSON.stringify(user));
                     setupListeners();
                 } else {
-                    alert('Phone number not found or inactive. Please contact Admin.');
+                    alert('Invalid Username or Password. Please try again.');
                 }
             } catch (err) {
                 console.error(err);
@@ -499,6 +569,7 @@
 
         window.handleLogout = () => {
             state.user = null; state.view = 'login'; state.activeTrip = null; state.trips = [];
+            localStorage.removeItem('driver_user');
             unsubscribers.forEach(u => u()); unsubscribers = [];
             render();
         };
@@ -927,23 +998,37 @@
                     </div>
 
                     <form onsubmit="return handleLogin(event)" class="space-y-6">
-                        <div class="space-y-2 text-left">
-                            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
-                            <div class="relative group">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <i class="ph-bold ph-phone text-slate-400 text-xl group-focus-within:text-indigo-400 transition-colors"></i>
+                        <div class="space-y-4 text-left">
+                            <div>
+                                <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Username</label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <i class="ph-bold ph-user text-slate-400 text-xl group-focus-within:text-indigo-400 transition-colors"></i>
+                                    </div>
+                                    <input type="text" id="login-username" 
+                                        class="w-full pl-12 pr-4 py-4 rounded-xl text-lg font-bold bg-slate-50 text-slate-800 border-2 border-slate-100 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none placeholder-slate-400 shadow-inner"
+                                        placeholder="Enter Username" 
+                                        required>
                                 </div>
-                                <input type="tel" id="login-phone" 
-                                    class="w-full pl-12 pr-4 py-4 rounded-xl text-lg font-bold bg-slate-50 text-slate-800 border-2 border-slate-100 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none placeholder-slate-400 shadow-inner"
-                                    placeholder="Enter 10-digit number" 
-                                    required pattern="[0-9]{10}" maxlength="10">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Password</label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <i class="ph-bold ph-lock-key text-slate-400 text-xl group-focus-within:text-indigo-400 transition-colors"></i>
+                                    </div>
+                                    <input type="password" id="login-password" 
+                                        class="w-full pl-12 pr-4 py-4 rounded-xl text-lg font-bold bg-slate-50 text-slate-800 border-2 border-slate-100 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none placeholder-slate-400 shadow-inner"
+                                        placeholder="Enter Password" 
+                                        required>
+                                </div>
                             </div>
                         </div>
 
                         <button type="submit" class="w-full py-4 rounded-xl font-bold text-lg text-white shadow-xl shadow-indigo-500/30 btn-primary relative overflow-hidden group hover:scale-[1.02] active:scale-95 transition-all">
                             <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                             <span class="relative flex items-center justify-center gap-2">
-                                <span>Start Shift</span>
+                                <span>Login</span>
                                 <i class="ph-bold ph-arrow-right"></i>
                             </span>
                         </button>
@@ -1198,9 +1283,12 @@
             </div>`;
             const f = state.form;
 
-            // Get all vehicles for the user's branch
-            const userBranch = state.user.branch || 'Coimbatore';
-            const branchVehicles = state.vehicles ? state.vehicles.filter(v => (v.branch || 'Coimbatore') === userBranch) : [];
+            // Get all vehicles for the user's branch(es)
+            const userBranches = Array.isArray(state.user.branch) ? state.user.branch : [state.user.branch || 'Coimbatore'];
+            const branchVehicles = state.vehicles ? state.vehicles.filter(v => {
+                const vBranch = v.branch || 'Coimbatore';
+                return userBranches.includes('All') || userBranches.includes(vBranch) || vBranch === 'All';
+            }) : [];
 
             // Get all active trips for determining lock status
             const activeTrips = state.allActiveTrips || [];
@@ -1228,14 +1316,14 @@
 
             const vehicleOptions = availableOptionsArr.join('') + lockedOptionsArr.join('') || '<option disabled>Loading...</option>';
 
-            const ub = state.user.branch || 'Coimbatore';
+            const userBranchesForLoc = Array.isArray(state.user.branch) ? state.user.branch : [state.user.branch || 'Coimbatore'];
             const branchLocations = state.locations ? state.locations.filter(l => {
                 // Multi-branch support
                 if (l.branches && Array.isArray(l.branches)) {
-                    return l.branches.includes('All') || l.branches.includes(ub);
+                    return l.branches.some(lb => userBranchesForLoc.includes(lb) || lb === 'All') || userBranchesForLoc.includes('All');
                 }
                 const lb = l.branch || 'All';
-                return lb === 'All' || lb === ub;
+                return lb === 'All' || userBranchesForLoc.includes('All') || userBranchesForLoc.includes(lb);
             }).sort((a, b) => a.name.localeCompare(b.name)) : [];
             const locationOptions = (selected) => branchLocations.map(l => `<option value="${l.name}" ${selected === l.name ? 'selected' : ''}>${l.name}</option>`).join('');
 
@@ -1373,8 +1461,11 @@
         };
 
         window.renderFuel = () => {
-            const userBranch = state.user?.branch || 'All';
-            const vehicles = (state.vehicles || []).filter(v => v.branch === userBranch);
+            const userBranches = Array.isArray(state.user?.branch) ? state.user.branch : [state.user?.branch || 'All'];
+            const vehicles = (state.vehicles || []).filter(v => {
+                const vBranch = v.branch || 'All';
+                return userBranches.includes('All') || userBranches.includes(vBranch) || vBranch === 'All';
+            });
 
             return `
             <div class="animate-fade-in pb-32">
@@ -1467,8 +1558,11 @@
         };
 
         window.renderMaintenance = () => {
-            const userBranch = state.user?.branch || 'All';
-            const vehicles = (state.vehicles || []).filter(v => v.branch === userBranch);
+            const userBranches = Array.isArray(state.user?.branch) ? state.user.branch : [state.user?.branch || 'All'];
+            const vehicles = (state.vehicles || []).filter(v => {
+                const vBranch = v.branch || 'All';
+                return userBranches.includes('All') || userBranches.includes(vBranch) || vBranch === 'All';
+            });
             const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
             const btnClass = "flex-1 py-3 px-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold text-xs transition-all hover:bg-slate-50 dark:hover:bg-slate-700";
 
